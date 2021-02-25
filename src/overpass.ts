@@ -7,7 +7,7 @@ interface OverpassOptions {
    */
   endpoint?: string;
   /**
-   * How many retries when rate limited before giving up?
+   * How many retries when rate limit/gateway timeout before giving up?
    */
   rateLimitRetries?: number;
   /**
@@ -97,17 +97,17 @@ export default function overpass(
               "\n"
             )
           );
-        } else if (resp.status === 429) {
+        } else if (resp.status === 429 || resp.status === 504) {
           // too many requests
 
           if (overpassOpts.rateLimitRetries === 0)
             throw new OverpassError(
-              "429 Too Many Requests. Retries Exhausted."
+              `${resp.status} ${resp.statusText}. Retries Exhausted.`
             );
 
           if (overpassOpts.verbose)
             console.debug(
-              `429 Too Many Requests. Retry #${overpassOpts.rateLimitRetries}`
+              `${resp.status} ${resp.statusText}. Retry #${overpassOpts.rateLimitRetries}`
             );
 
           return _sleep(overpassOpts.rateLimitPause as number).then(async () =>
