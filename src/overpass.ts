@@ -2,15 +2,33 @@ import type { OverpassResponse } from "./types";
 import fetch from "cross-fetch";
 
 interface OverpassOptions {
+  /**
+   * Overpass API endpoint URL (usually ends in /interpreter)
+   */
   endpoint?: string;
+  /**
+   * How many retries when rate limited before giving up?
+   */
   rateLimitRetries?: number;
+  /**
+   * Pause in between receiving a rate limited response and initiating a retry
+   */
   rateLimitPause?: number;
+  /**
+   * Output verbose query information
+   */
   verbose?: boolean;
+  /**
+   * Return a stream.Readable (in Node) or ReadableStream (in browser)
+   */
   stream?: boolean;
-  fetchOpts?: { [key: string]: any };
+  /**
+   * Options to be passed to fetch, will overwrite all defaults
+   */
+  fetchOpts?: object;
 }
 
-const defaultOpts = {
+const defaultOpts: OverpassOptions = {
   endpoint: "//overpass-api.de/api/interpreter",
   rateLimitRetries: 2,
   rateLimitPause: 2000,
