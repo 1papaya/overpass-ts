@@ -1,8 +1,6 @@
-import assert from "assert";
-import fs from "fs";
+import * as assert from "assert";
 
 import type {
-  OverpassXml,
   OverpassJson,
   OverpassOsmElement,
   OverpassTimeline,
@@ -12,10 +10,10 @@ import type {
   OverpassWay,
 } from "../src/types";
 
-import relations from "./examples/relation.json";
-import timelines from "./examples/timeline.json";
-import nodes from "./examples/node.json";
-import ways from "./examples/way.json";
+import * as relations from "./examples/relation.json";
+import * as timelines from "./examples/timeline.json";
+import * as nodes from "./examples/node.json";
+import * as ways from "./examples/way.json";
 
 describe("TypeScript Types", function () {
   it("JSON response type", function () {
@@ -44,24 +42,6 @@ describe("TypeScript Types", function () {
         timeline as OverpassElement;
         timeline as OverpassTimeline;
       }
-    });
-  });
-
-  it("XML response type", function () {
-    assert.doesNotThrow(function () {
-      const node = fs.readFileSync("./test/examples/node.xml", {
-        encoding: "utf8",
-      });
-      const way = fs.readFileSync("./test/examples/way.xml", {
-        encoding: "utf8",
-      });
-      const relation = fs.readFileSync("./test/examples/relation.xml", {
-        encoding: "utf8",
-      });
-
-      node as OverpassXml;
-      way as OverpassXml;
-      relation as OverpassXml;
     });
   });
 });

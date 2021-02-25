@@ -1,16 +1,15 @@
-import type { OverpassJson, OverpassXml } from "../src/index";
-import overpass from "../src/index";
-import assert from "assert";
+import type { OverpassJson } from "../src/index";
 import * as nodeStream from "stream";
+import overpass from "../src/index";
+import * as assert from "assert";
 
 describe("API Queries", function () {
-    
   it("200 stream request", function () {
     return overpass(`[out:json]; node(626639517); out geom;`, {
       verbose: true,
-      stream: true
+      stream: true,
     }).then((stream) => {
-        assert.strictEqual(stream instanceof nodeStream.Readable, true)
+      assert.strictEqual(stream instanceof nodeStream.Readable, true);
     });
   });
 
@@ -29,7 +28,7 @@ describe("API Queries", function () {
     return overpass(`[out:xml]; node(626639517); out geom;`, {
       verbose: true,
     }).then((xml) => {
-      xml = xml as OverpassXml;
+      xml = xml as string;
       console.log(xml);
     });
   });

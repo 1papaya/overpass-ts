@@ -1,5 +1,4 @@
-export type OverpassResponse = OverpassJson | OverpassXml;
-export type OverpassXml = string;
+export type OverpassResponse = OverpassJson | string;
 
 export interface OverpassJson {
   version: number;
