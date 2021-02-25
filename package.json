@@ -2,9 +2,10 @@
   "name": "overpass-ts",
   "version": "0.1.0",
   "description": "",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
+    "download-examples": "node test/download-examples.js",
     "test": "mocha --timeout 120000 test/test-*.ts"
   },
   "author": "",

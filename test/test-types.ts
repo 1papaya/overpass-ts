@@ -10,7 +10,7 @@ import type {
   OverpassElement,
   OverpassNode,
   OverpassWay,
-} from "../types";
+} from "../src/types";
 
 import relations from "./examples/relation.json";
 import timelines from "./examples/timeline.json";

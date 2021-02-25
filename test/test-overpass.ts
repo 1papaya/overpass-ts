@@ -1,5 +1,5 @@
-import type { OverpassJson, OverpassXml } from "../index";
-import overpass from "../index";
+import type { OverpassJson, OverpassXml } from "../src/index";
+import overpass from "../src/index";
 import assert from "assert";
 import * as nodeStream from "stream";
 

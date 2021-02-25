@@ -3,7 +3,7 @@ const fetch = require("cross-fetch");
 
 const date = "2021-02-22T16:20:00Z";
 
-const outDir = "./examples";
+const outDir = "./test/examples";
 
 const outTypes = [
   "ids",
