@@ -39,9 +39,7 @@ const defaultOpts: OverpassOptions = {
     mode: "cors",
     redirect: "follow",
     headers: {
-      Accept: ["application/json", "application/osm3s+xml", "text/csv"].join(
-        ";"
-      ),
+      Accept: "*",
       "User-Agent": "overpass-ts",
     },
   },
@@ -98,7 +96,7 @@ export default function overpass(
             )
           );
         } else if (resp.status === 429 || resp.status === 504) {
-          // too many requests
+          // retry if too many requests / gateway timeout
 
           if (overpassOpts.rateLimitRetries === 0)
             throw new OverpassError(
