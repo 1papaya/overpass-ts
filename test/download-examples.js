@@ -40,7 +40,7 @@ const overpassToDisk = async function (
 
   console.log(`sending: ${query}`);
 
-  return fetch("https://overpass.kumi.systems/api/interpreter", {
+  return fetch("//overpass-api.de/api/interpreter", {
     method: "POST",
     mode: "cors",
     redirect: "follow",
@@ -138,7 +138,7 @@ const overpassToDisk = async function (
   );
 
   // rate limit example
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 10; i++) {
     overpassToDisk(
       `[out:xml]; way[highway]; out geom;`,
       `${outDir}/429-too-many-requests-${i}.txt`,
