@@ -1,4 +1,4 @@
-# overpass-ts
+# overpass-ts [![Node.js CI](https://github.com/geodavey/overpass-ts/actions/workflows/node.js.yml/badge.svg)](https://github.com/geodavey/overpass-ts/actions/workflows/node.js.yml)
 promise-based overpass api client in typescript
 
 * works in browser & node via `cross-fetch`
