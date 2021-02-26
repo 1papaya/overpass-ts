@@ -18,8 +18,8 @@ const outTypes = [
 
 const testElements = {
   node: 626639517,
-  way: 70177449,
-  relation: 3326074,
+  way: 8675309,
+  relation: 62761,
 };
 
 const sleep = function (s) {
@@ -40,7 +40,7 @@ const overpassToDisk = async function (
 
   console.log(`sending: ${query}`);
 
-  return fetch("https://overpass-api.de/api/interpreter", {
+  return fetch("https://overpass.kumi.systems/api/interpreter", {
     method: "POST",
     mode: "cors",
     redirect: "follow",
