@@ -1,30 +1,31 @@
 {
-  "url": "https://overpass.kumi.systems/api/interpreter",
-  "statusText": "OK",
-  "status": 200,
+  "url": "https://overpass-api.de/api/interpreter",
+  "statusText": "Too Many Requests",
+  "status": 429,
   "redirected": false,
   "headers": {
     "connection": "close",
-    "content-type": "application/osm3s+xml",
-    "date": "Fri, 26 Feb 2021 15:06:18 GMT",
-    "server": "nginx/1.18.0 (Ubuntu)",
-    "transfer-encoding": "chunked"
+    "content-encoding": "gzip",
+    "content-length": "488",
+    "content-type": "text/html; charset=utf-8",
+    "date": "Fri, 26 Feb 2021 15:31:51 GMT",
+    "server": "Apache/2.4.18 (Ubuntu)",
+    "vary": "Accept-Encoding"
   }
 }
 
 <?xml version="1.0" encoding="UTF-8"?>
-<osm version="0.6" generator="Overpass API 0.7.56.8 7d656e78">
-<note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
-<meta osm_base="2021-02-26T15:03:32Z"/>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" lang="en"/>
+  <title>OSM3S Response</title>
+</head>
+<body>
 
-  <node id="626639517" lat="42.7739430" lon="-0.1473437">
-    <tag k="alt_name" v="Pique Longue"/>
-    <tag k="ele" v="3298"/>
-    <tag k="name" v="Vignemale"/>
-    <tag k="natural" v="peak"/>
-    <tag k="prominence" v="1027"/>
-    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
-    <tag k="wikidata" v="Q1348903"/>
-  </node>
+<p>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</p>
+<p><strong style="color:#FF0000">Error</strong>: runtime error: open64: 0 Success /osm3s_v0.7.55_osm_base Dispatcher_Client::request_read_and_idx::rate_limited. Please check /api/status for the quota of your IP address. </p>
 
-</osm>
+</body>
+</html>
