@@ -74,6 +74,13 @@ export default function overpass(
     async (resp) => {
       if (resp.ok) {
         // status = 200
+        if (overpassOpts.verbose)
+          console.debug(
+            `payload: ${_humanReadableBytes(
+              parseInt(resp.headers.get("content-length") as string)
+            )}`
+          );
+
         if (overpassOpts.stream) return resp.body;
 
         if (resp.headers.get("content-type") === "application/json") {
@@ -131,6 +138,12 @@ class OverpassError extends Error {
     super(`Overpass Error: ${message}`);
   }
 }
+
+const _humanReadableBytes = (bytes: number) => {
+  return bytes > 1024 * 1024
+    ? `${Math.round((bytes / (1024 * 1024)) * 100) / 100}MiB`
+    : `${Math.round((bytes / 1024 * 100)) / 100}KiB`;
+};
 
 const _matchAll = (regex: RegExp, string: string) => {
   let match,
