@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "download-examples": "node test/download-examples.js",
-    "test": "mocha --timeout 120000 test/test-*.ts"
+    "test": "mocha --timeout 360000 test/test-*.ts"
   },
   "author": "",
   "license": "ISC",

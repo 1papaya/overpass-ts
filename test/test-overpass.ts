@@ -6,6 +6,7 @@ import * as assert from "assert";
 describe("API Queries", function () {
   it("200 stream request", function () {
     return overpass(`[out:json]; node(626639517); out geom;`, {
+      endpoint: "//overpass.kumi.systems/api/interpreter",
       rateLimitRetries: 10,
       verbose: true,
       stream: true,
@@ -16,6 +17,7 @@ describe("API Queries", function () {
 
   it("200 JSON request", function () {
     return overpass(`[out:json]; node(626639517); out geom;`, {
+      endpoint: "//overpass.kumi.systems/api/interpreter",
       rateLimitRetries: 10,
       verbose: true,
     }).then((json) => {
@@ -28,6 +30,7 @@ describe("API Queries", function () {
 
   it("200 XML request", function () {
     return overpass(`[out:xml]; node(626639517); out geom;`, {
+      endpoint: "//overpass.kumi.systems/api/interpreter",
       rateLimitRetries: 10,
       verbose: true,
     }).then((xml) => {
@@ -38,6 +41,7 @@ describe("API Queries", function () {
 
   it("400 bad request", function () {
     return overpass(`[out:json]; this aint gonna work`, {
+      endpoint: "//overpass.kumi.systems/api/interpreter",
       rateLimitRetries: 10,
       verbose: true,
     }).catch((error) => console.log(error.message));
@@ -45,6 +49,7 @@ describe("API Queries", function () {
 
   it("400 bad request", function () {
     return overpass(`[out:json]; this aint gonna work`, {
+      endpoint: "//overpass.kumi.systems/api/interpreter",
       rateLimitRetries: 10,
       verbose: true,
     }).catch((error) => console.log(error.message));
@@ -62,6 +67,7 @@ describe("API Queries", function () {
     for (let i = 0; i < 2; i++) overpass(`[out:json]; way[highway]; out geom;`);
 
     return overpass(`[out:json]; node(626639517); out geom;`, {
+      endpoint: "//overpass.kumi.systems/api/interpreter",
       rateLimitRetries: 10,
       verbose: true,
     })
