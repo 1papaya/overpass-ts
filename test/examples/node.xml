@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API 0.7.56.8 7d656e78">
+<note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
+<meta osm_base="2021-02-26T15:00:27Z"/>
+
+  <node id="626639517"/>
+  <node id="626639517" lat="42.7739430" lon="-0.1473437"/>
+  <node id="626639517" lat="42.7739430" lon="-0.1473437">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+  <node id="626639517">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+  <node id="626639517" lat="42.7739430" lon="-0.1473437" version="9" timestamp="2020-01-03T08:30:46Z" changeset="79146463" uid="4224320" user="oc-OpenStreetMap">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+  <node id="626639517" lat="42.7739430" lon="-0.1473437">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+  <node id="626639517" lat="42.7739430" lon="-0.1473437">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+  <node id="626639517" lat="42.7739430" lon="-0.1473437">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+
+</osm>

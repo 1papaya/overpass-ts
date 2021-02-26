@@ -1,0 +1,28 @@
+{
+  "url": "https://overpass.kumi.systems/api/interpreter",
+  "statusText": "OK",
+  "status": 200,
+  "redirected": false,
+  "headers": {
+    "connection": "close",
+    "content-type": "application/json",
+    "date": "Fri, 26 Feb 2021 15:06:07 GMT",
+    "server": "nginx/1.18.0 (Ubuntu)",
+    "transfer-encoding": "chunked"
+  }
+}
+
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.56.8 7d656e78",
+  "osm3s": {
+    "timestamp_osm_base": "2021-02-26T15:02:28Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+
+
+  ],
+"remark": "runtime error: Query run out of memory using about 2048 MB of RAM."
+}

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API 0.7.56.8 7d656e78">
+<note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
+<meta osm_base="2021-02-26T15:00:27Z"/>
+
+  <way id="8675309"/>
+  <way id="8675309">
+    <nd ref="61942589"/>
+    <nd ref="5499636567"/>
+    <nd ref="61942591"/>
+    <nd ref="5497349465"/>
+    <nd ref="61942592"/>
+    <nd ref="61942594"/>
+    <nd ref="61942596"/>
+    <nd ref="5698838409"/>
+    <nd ref="61942599"/>
+    <nd ref="61942601"/>
+  </way>
+  <way id="8675309">
+    <nd ref="61942589"/>
+    <nd ref="5499636567"/>
+    <nd ref="61942591"/>
+    <nd ref="5497349465"/>
+    <nd ref="61942592"/>
+    <nd ref="61942594"/>
+    <nd ref="61942596"/>
+    <nd ref="5698838409"/>
+    <nd ref="61942599"/>
+    <nd ref="61942601"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="Robinson Ridge"/>
+    <tag k="tiger:cfcc" v="A41"/>
+    <tag k="tiger:county" v="Macomb, MI"/>
+    <tag k="tiger:name_base" v="Robinson Ridge"/>
+    <tag k="tiger:reviewed" v="no"/>
+    <tag k="tiger:zip_left" v="48038"/>
+    <tag k="tiger:zip_right" v="48038"/>
+  </way>
+  <way id="8675309">
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="Robinson Ridge"/>
+    <tag k="tiger:cfcc" v="A41"/>
+    <tag k="tiger:county" v="Macomb, MI"/>
+    <tag k="tiger:name_base" v="Robinson Ridge"/>
+    <tag k="tiger:reviewed" v="no"/>
+    <tag k="tiger:zip_left" v="48038"/>
+    <tag k="tiger:zip_right" v="48038"/>
+  </way>
+  <way id="8675309" version="7" timestamp="2018-06-18T09:21:58Z" changeset="59936650" uid="5677293" user="bhavana naga">
+    <nd ref="61942589"/>
+    <nd ref="5499636567"/>
+    <nd ref="61942591"/>
+    <nd ref="5497349465"/>
+    <nd ref="61942592"/>
+    <nd ref="61942594"/>
+    <nd ref="61942596"/>
+    <nd ref="5698838409"/>
+    <nd ref="61942599"/>
+    <nd ref="61942601"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="Robinson Ridge"/>
+    <tag k="tiger:cfcc" v="A41"/>
+    <tag k="tiger:county" v="Macomb, MI"/>
+    <tag k="tiger:name_base" v="Robinson Ridge"/>
+    <tag k="tiger:reviewed" v="no"/>
+    <tag k="tiger:zip_left" v="48038"/>
+    <tag k="tiger:zip_right" v="48038"/>
+  </way>
+  <way id="8675309">
+    <bounds minlat="42.6194197" minlon="-82.9183053" maxlat="42.6206812" maxlon="-82.9182232"/>
+    <nd ref="61942589" lat="42.6206812" lon="-82.9182361"/>
+    <nd ref="5499636567" lat="42.6206571" lon="-82.9182237"/>
+    <nd ref="61942591" lat="42.6206350" lon="-82.9182232"/>
+    <nd ref="5497349465" lat="42.6206244" lon="-82.9182233"/>
+    <nd ref="61942592" lat="42.6205810" lon="-82.9182235"/>
+    <nd ref="61942594" lat="42.6197588" lon="-82.9182825"/>
+    <nd ref="61942596" lat="42.6195836" lon="-82.9182955"/>
+    <nd ref="5698838409" lat="42.6194996" lon="-82.9183018"/>
+    <nd ref="61942599" lat="42.6194526" lon="-82.9183053"/>
+    <nd ref="61942601" lat="42.6194197" lon="-82.9182864"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="Robinson Ridge"/>
+    <tag k="tiger:cfcc" v="A41"/>
+    <tag k="tiger:county" v="Macomb, MI"/>
+    <tag k="tiger:name_base" v="Robinson Ridge"/>
+    <tag k="tiger:reviewed" v="no"/>
+    <tag k="tiger:zip_left" v="48038"/>
+    <tag k="tiger:zip_right" v="48038"/>
+  </way>
+  <way id="8675309">
+    <bounds minlat="42.6194197" minlon="-82.9183053" maxlat="42.6206812" maxlon="-82.9182232"/>
+    <nd ref="61942589"/>
+    <nd ref="5499636567"/>
+    <nd ref="61942591"/>
+    <nd ref="5497349465"/>
+    <nd ref="61942592"/>
+    <nd ref="61942594"/>
+    <nd ref="61942596"/>
+    <nd ref="5698838409"/>
+    <nd ref="61942599"/>
+    <nd ref="61942601"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="Robinson Ridge"/>
+    <tag k="tiger:cfcc" v="A41"/>
+    <tag k="tiger:county" v="Macomb, MI"/>
+    <tag k="tiger:name_base" v="Robinson Ridge"/>
+    <tag k="tiger:reviewed" v="no"/>
+    <tag k="tiger:zip_left" v="48038"/>
+    <tag k="tiger:zip_right" v="48038"/>
+  </way>
+  <way id="8675309">
+    <center lat="42.6200505" lon="-82.9182642"/>
+    <nd ref="61942589"/>
+    <nd ref="5499636567"/>
+    <nd ref="61942591"/>
+    <nd ref="5497349465"/>
+    <nd ref="61942592"/>
+    <nd ref="61942594"/>
+    <nd ref="61942596"/>
+    <nd ref="5698838409"/>
+    <nd ref="61942599"/>
+    <nd ref="61942601"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="Robinson Ridge"/>
+    <tag k="tiger:cfcc" v="A41"/>
+    <tag k="tiger:county" v="Macomb, MI"/>
+    <tag k="tiger:name_base" v="Robinson Ridge"/>
+    <tag k="tiger:reviewed" v="no"/>
+    <tag k="tiger:zip_left" v="48038"/>
+    <tag k="tiger:zip_right" v="48038"/>
+  </way>
+
+</osm>

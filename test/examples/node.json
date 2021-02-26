@@ -1,0 +1,115 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.56.3 eb200aeb",
+  "osm3s": {
+    "timestamp_osm_base": "2021-02-22T02:20:39Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 626639517
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "lat": 42.7739430,
+  "lon": -0.1473437
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "lat": 42.7739430,
+  "lon": -0.1473437,
+  "tags": {
+    "alt_name": "Pique Longue",
+    "ele": "3298",
+    "name": "Vignemale",
+    "natural": "peak",
+    "prominence": "1027",
+    "source:prominence": "https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders",
+    "wikidata": "Q1348903"
+  }
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "tags": {
+    "alt_name": "Pique Longue",
+    "ele": "3298",
+    "name": "Vignemale",
+    "natural": "peak",
+    "prominence": "1027",
+    "source:prominence": "https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders",
+    "wikidata": "Q1348903"
+  }
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "lat": 42.7739430,
+  "lon": -0.1473437,
+  "timestamp": "2020-01-03T08:30:46Z",
+  "version": 9,
+  "changeset": 79146463,
+  "user": "oc-OpenStreetMap",
+  "uid": 4224320,
+  "tags": {
+    "alt_name": "Pique Longue",
+    "ele": "3298",
+    "name": "Vignemale",
+    "natural": "peak",
+    "prominence": "1027",
+    "source:prominence": "https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders",
+    "wikidata": "Q1348903"
+  }
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "lat": 42.7739430,
+  "lon": -0.1473437,
+  "tags": {
+    "alt_name": "Pique Longue",
+    "ele": "3298",
+    "name": "Vignemale",
+    "natural": "peak",
+    "prominence": "1027",
+    "source:prominence": "https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders",
+    "wikidata": "Q1348903"
+  }
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "lat": 42.7739430,
+  "lon": -0.1473437,
+  "tags": {
+    "alt_name": "Pique Longue",
+    "ele": "3298",
+    "name": "Vignemale",
+    "natural": "peak",
+    "prominence": "1027",
+    "source:prominence": "https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders",
+    "wikidata": "Q1348903"
+  }
+},
+{
+  "type": "node",
+  "id": 626639517,
+  "lat": 42.7739430,
+  "lon": -0.1473437,
+  "tags": {
+    "alt_name": "Pique Longue",
+    "ele": "3298",
+    "name": "Vignemale",
+    "natural": "peak",
+    "prominence": "1027",
+    "source:prominence": "https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders",
+    "wikidata": "Q1348903"
+  }
+}
+
+  ]
+}

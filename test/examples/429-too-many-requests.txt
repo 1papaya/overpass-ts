@@ -1,0 +1,30 @@
+{
+  "url": "https://overpass.kumi.systems/api/interpreter",
+  "statusText": "OK",
+  "status": 200,
+  "redirected": false,
+  "headers": {
+    "connection": "close",
+    "content-type": "application/osm3s+xml",
+    "date": "Fri, 26 Feb 2021 15:06:18 GMT",
+    "server": "nginx/1.18.0 (Ubuntu)",
+    "transfer-encoding": "chunked"
+  }
+}
+
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API 0.7.56.8 7d656e78">
+<note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
+<meta osm_base="2021-02-26T15:03:32Z"/>
+
+  <node id="626639517" lat="42.7739430" lon="-0.1473437">
+    <tag k="alt_name" v="Pique Longue"/>
+    <tag k="ele" v="3298"/>
+    <tag k="name" v="Vignemale"/>
+    <tag k="natural" v="peak"/>
+    <tag k="prominence" v="1027"/>
+    <tag k="source:prominence" v="https://en.wikipedia.org/wiki/List_of_Pyrenean_three-thousanders"/>
+    <tag k="wikidata" v="Q1348903"/>
+  </node>
+
+</osm>

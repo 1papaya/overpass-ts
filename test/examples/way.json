@@ -1,0 +1,209 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.56.8 7d656e78",
+  "osm3s": {
+    "timestamp_osm_base": "2021-02-26T15:00:27Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 8675309
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "nodes": [
+    61942589,
+    5499636567,
+    61942591,
+    5497349465,
+    61942592,
+    61942594,
+    61942596,
+    5698838409,
+    61942599,
+    61942601
+  ]
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "nodes": [
+    61942589,
+    5499636567,
+    61942591,
+    5497349465,
+    61942592,
+    61942594,
+    61942596,
+    5698838409,
+    61942599,
+    61942601
+  ],
+  "tags": {
+    "highway": "residential",
+    "name": "Robinson Ridge",
+    "tiger:cfcc": "A41",
+    "tiger:county": "Macomb, MI",
+    "tiger:name_base": "Robinson Ridge",
+    "tiger:reviewed": "no",
+    "tiger:zip_left": "48038",
+    "tiger:zip_right": "48038"
+  }
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "tags": {
+    "highway": "residential",
+    "name": "Robinson Ridge",
+    "tiger:cfcc": "A41",
+    "tiger:county": "Macomb, MI",
+    "tiger:name_base": "Robinson Ridge",
+    "tiger:reviewed": "no",
+    "tiger:zip_left": "48038",
+    "tiger:zip_right": "48038"
+  }
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "timestamp": "2018-06-18T09:21:58Z",
+  "version": 7,
+  "changeset": 59936650,
+  "user": "bhavana naga",
+  "uid": 5677293,
+  "nodes": [
+    61942589,
+    5499636567,
+    61942591,
+    5497349465,
+    61942592,
+    61942594,
+    61942596,
+    5698838409,
+    61942599,
+    61942601
+  ],
+  "tags": {
+    "highway": "residential",
+    "name": "Robinson Ridge",
+    "tiger:cfcc": "A41",
+    "tiger:county": "Macomb, MI",
+    "tiger:name_base": "Robinson Ridge",
+    "tiger:reviewed": "no",
+    "tiger:zip_left": "48038",
+    "tiger:zip_right": "48038"
+  }
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "bounds": {
+    "minlat": 42.6194197,
+    "minlon": -82.9183053,
+    "maxlat": 42.6206812,
+    "maxlon": -82.9182232
+  },
+  "nodes": [
+    61942589,
+    5499636567,
+    61942591,
+    5497349465,
+    61942592,
+    61942594,
+    61942596,
+    5698838409,
+    61942599,
+    61942601
+  ],
+  "geometry": [
+    { "lat": 42.6206812, "lon": -82.9182361 },
+    { "lat": 42.6206571, "lon": -82.9182237 },
+    { "lat": 42.6206350, "lon": -82.9182232 },
+    { "lat": 42.6206244, "lon": -82.9182233 },
+    { "lat": 42.6205810, "lon": -82.9182235 },
+    { "lat": 42.6197588, "lon": -82.9182825 },
+    { "lat": 42.6195836, "lon": -82.9182955 },
+    { "lat": 42.6194996, "lon": -82.9183018 },
+    { "lat": 42.6194526, "lon": -82.9183053 },
+    { "lat": 42.6194197, "lon": -82.9182864 }
+  ],
+  "tags": {
+    "highway": "residential",
+    "name": "Robinson Ridge",
+    "tiger:cfcc": "A41",
+    "tiger:county": "Macomb, MI",
+    "tiger:name_base": "Robinson Ridge",
+    "tiger:reviewed": "no",
+    "tiger:zip_left": "48038",
+    "tiger:zip_right": "48038"
+  }
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "bounds": {
+    "minlat": 42.6194197,
+    "minlon": -82.9183053,
+    "maxlat": 42.6206812,
+    "maxlon": -82.9182232
+  },
+  "nodes": [
+    61942589,
+    5499636567,
+    61942591,
+    5497349465,
+    61942592,
+    61942594,
+    61942596,
+    5698838409,
+    61942599,
+    61942601
+  ],
+  "tags": {
+    "highway": "residential",
+    "name": "Robinson Ridge",
+    "tiger:cfcc": "A41",
+    "tiger:county": "Macomb, MI",
+    "tiger:name_base": "Robinson Ridge",
+    "tiger:reviewed": "no",
+    "tiger:zip_left": "48038",
+    "tiger:zip_right": "48038"
+  }
+},
+{
+  "type": "way",
+  "id": 8675309,
+  "center": {
+    "lat": 42.6200505,
+    "lon": -82.9182642
+  },
+  "nodes": [
+    61942589,
+    5499636567,
+    61942591,
+    5497349465,
+    61942592,
+    61942594,
+    61942596,
+    5698838409,
+    61942599,
+    61942601
+  ],
+  "tags": {
+    "highway": "residential",
+    "name": "Robinson Ridge",
+    "tiger:cfcc": "A41",
+    "tiger:county": "Macomb, MI",
+    "tiger:name_base": "Robinson Ridge",
+    "tiger:reviewed": "no",
+    "tiger:zip_left": "48038",
+    "tiger:zip_right": "48038"
+  }
+}
+
+  ]
+}
