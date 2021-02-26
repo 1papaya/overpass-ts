@@ -74,7 +74,7 @@ export default function overpass(
     async (resp) => {
       if (resp.ok) {
         // status = 200
-        if (overpassOpts.verbose)
+        if (overpassOpts.verbose && resp.headers.has("content-length"))
           console.debug(
             `payload: ${_humanReadableBytes(
               parseInt(resp.headers.get("content-length") as string)
@@ -142,7 +142,7 @@ class OverpassError extends Error {
 const _humanReadableBytes = (bytes: number) => {
   return bytes > 1024 * 1024
     ? `${Math.round((bytes / (1024 * 1024)) * 100) / 100}MiB`
-    : `${Math.round((bytes / 1024 * 100)) / 100}KiB`;
+    : `${Math.round((bytes / 1024) * 100) / 100}KiB`;
 };
 
 const _matchAll = (regex: RegExp, string: string) => {
