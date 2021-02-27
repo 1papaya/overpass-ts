@@ -68,30 +68,17 @@ export interface OverpassRelation extends OverpassOsmElement {
   geometry?: OverpassPointGeom[];
 }
 
-export type OverpassRelationMember =
-  | OverpassRelationMemberNode
-  | OverpassRelationMemberWay
-  | OverpassRelationMemberRelation;
-
-export interface OverpassRelationMemberNode {
-  type: "node";
+export interface OverpassRelationMember {
+  type: "node" | "way" | "relation";
   ref: number;
   role: string;
+
+  // Relation Node Members in `out geom;` have lon/lats
   lon?: number;
   lat?: number;
-}
 
-export interface OverpassRelationMemberWay {
-  type: "way";
-  ref: number;
-  role: string;
+  // Relation Way Members in `out geom;` have point geoms
   geometry?: OverpassPointGeom[];
-}
-
-export interface OverpassRelationMemberRelation {
-  type: "relation";
-  ref: number;
-  role: string;
 }
 
 //
