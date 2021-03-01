@@ -1,7 +1,7 @@
 # overpass-ts [![Node.js CI](https://github.com/geodavey/overpass-ts/actions/workflows/node.js.yml/badge.svg)](https://github.com/geodavey/overpass-ts/actions/workflows/node.js.yml)
 promise-based overpass api client in typescript
 
-* works in browser & node via `cross-fetch`
+* works in browser & node
 * support json & xml/text & stream response
 * auto-retry if rate limit (409) or gateway timeout (504)
 * helpful error messages
