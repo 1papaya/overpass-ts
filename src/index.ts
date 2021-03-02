@@ -1,6 +1,5 @@
 import type { OverpassResponse } from "./types";
 import type { Readable } from "stream";
-import "isomorphic-fetch";
 
 export * from "./types";
 

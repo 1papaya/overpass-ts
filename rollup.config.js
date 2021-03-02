@@ -1,25 +1,27 @@
 import typescript from "@rollup/plugin-typescript";
 
-export default {
-  external: ["isomorphic-fetch"],
-  input: "src/index.ts",
-  output: [
-    {
-      file: "dist/overpass-ts.cjs.js",
-      format: "commonjs",
-      exports: "auto",
-      globals: {
-        "isomorphic-fetch": "fetch",
+export default [
+  {
+    input: "src/index.ts",
+    output: [
+      {
+        file: "dist/overpass-ts.browser.cjs.js",
+        format: "commonjs",
+        exports: "auto",
       },
-    },
-    {
-      name: "superroute",
-      file: "dist/overpass-ts.esm.js",
-      format: "es",
-      globals: {
-        "isomorphic-fetch": "fetch",
+    ],
+    plugins: [typescript()],
+  },
+  {
+    input: "src/node.ts",
+    output: [
+      {
+        name: "superroute",
+        file: "dist/overpass-ts.node.esm.js",
+        format: "es",
       },
-    },
-  ],
-  plugins: [typescript()],
-};
+    ],
+    external: ["isometric-fetch"],
+    plugins: [typescript()],
+  },
+];
