@@ -5,9 +5,8 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        file: "dist/overpass-ts.browser.cjs.js",
-        format: "commonjs",
-        exports: "auto",
+        file: "dist/overpass-ts.browser.esm.js",
+        format: "es"
       },
     ],
     plugins: [typescript()],
@@ -16,12 +15,12 @@ export default [
     input: "src/node.ts",
     output: [
       {
-        name: "superroute",
+        name: "overpass-ts",
         file: "dist/overpass-ts.node.esm.js",
         format: "es",
       },
     ],
-    external: ["isometric-fetch"],
+    external: ["node-fetch"],
     plugins: [typescript()],
   },
 ];
