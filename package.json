@@ -2,8 +2,9 @@
   "name": "overpass-ts",
   "version": "3.1.0",
   "description": "",
-  "main": "dist/overpass-ts.browser.cjs.js",
+  "main": "dist/overpass-ts.node.esm.js",
   "module": "dist/overpass-ts.node.esm.js",
+  "browser": "dist/overpass-ts.browser.cjs.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
