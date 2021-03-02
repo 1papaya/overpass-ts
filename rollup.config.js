@@ -6,23 +6,12 @@ export default [
     output: [
       {
         name: "overpass-ts",
-        file: "dist/overpass-ts.browser.cjs.js",
-        format: "cjs",
-        exports: "auto"
+        file: "dist/overpass-ts.umd.js",
+        format: "umd",
+        exports: "default"
       },
     ],
-    plugins: [typescript()],
-  },
-  {
-    input: "src/node.ts",
-    output: [
-      {
-        name: "overpass-ts",
-        file: "dist/overpass-ts.node.esm.js",
-        format: "es",
-      },
-    ],
-    external: ["node-fetch"],
+    external: ["isomorphic-fetch"],
     plugins: [typescript()],
   },
 ];
