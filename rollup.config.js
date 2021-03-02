@@ -6,8 +6,8 @@ export default [
     output: [
       {
         name: "overpass-ts",
-        file: "dist/overpass-ts.browser.umd.js",
-        format: "umd",
+        file: "dist/overpass-ts.browser.cjs.js",
+        format: "cjs",
         exports: "auto"
       },
     ],
