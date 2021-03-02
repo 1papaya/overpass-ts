@@ -5,12 +5,10 @@
     }
   },
   "compilerOptions": {
-    "target": "es2015",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "target": "esnext",
     "strict": true,
     "declaration": true,
-    "outDir": "dist/esm"
+    "outDir": "dist/"
   },
   "exclude": ["node_modules", "dist", "test"]
 }

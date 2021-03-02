@@ -47,14 +47,6 @@ describe("API Queries", function () {
     }).catch((error) => console.log(error.message));
   });
 
-  it("400 bad request", function () {
-    return overpass(`[out:json]; this aint gonna work`, {
-      endpoint: "//overpass.kumi.systems/api/interpreter",
-      rateLimitRetries: 10,
-      verbose: true,
-    }).catch((error) => console.log(error.message));
-  });
-
   it("bad url", function () {
     return overpass(`[out:json]; this aint gonna work`, {
       rateLimitRetries: 10,

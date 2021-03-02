@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import * as fs from "fs";
 
 import type {
   OverpassJson,
@@ -10,10 +11,14 @@ import type {
   OverpassWay,
 } from "../src/types";
 
-import * as relations from "./examples/relation.json";
-import * as timelines from "./examples/timeline.json";
-import * as nodes from "./examples/node.json";
-import * as ways from "./examples/way.json";
+function jsonFromFile(path: string) {
+  return JSON.parse(fs.readFileSync(path, {encoding: "utf8"}));
+}
+
+const relations = jsonFromFile("./test/examples/relation.json");
+const timelines = jsonFromFile("./test/examples/timeline.json");
+const nodes = jsonFromFile("./test/examples/node.json");
+const ways = jsonFromFile("./test/examples/way.json");
 
 describe("TypeScript Types", function () {
   it("JSON response type", function () {
