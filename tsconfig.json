@@ -6,12 +6,11 @@
   },
   "compilerOptions": {
     "target": "es2015",
-    "module": "es2015",
+    "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
     "declaration": true,
-    "outDir": "dist",
-    "resolveJsonModule": true
+    "outDir": "dist/esm"
   },
   "exclude": ["node_modules", "dist", "test"]
 }
