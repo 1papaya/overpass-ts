@@ -2,11 +2,11 @@ import typescript from "@rollup/plugin-typescript";
 
 export default [
   {
-    input: "src/index.ts",
+    input: "src/overpass-ts.ts",
     output: [
       {
         name: "overpass-ts",
-        file: "dist/overpass-ts.umd.js",
+        file: "dist/overpass-ts.js",
         format: "umd",
         exports: "default"
       },
