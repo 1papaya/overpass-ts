@@ -5,8 +5,10 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        file: "dist/overpass-ts.browser.esm.js",
-        format: "es"
+        name: "overpass-ts",
+        file: "dist/overpass-ts.browser.umd.js",
+        format: "umd",
+        exports: "auto"
       },
     ],
     plugins: [typescript()],
