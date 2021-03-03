@@ -19,11 +19,8 @@ export default [
     output: {
       name: "overpass-ts",
       file: "dist/overpass-ts.node.js",
-      format: "es",
-      globals: {
-        "cross-fetch": "fetch",
-      },
+      format: "umd",
     },
-    plugins: [typescript()]
+    plugins: [typescript()],
   },
 ];
