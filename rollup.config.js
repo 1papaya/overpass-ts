@@ -8,10 +8,22 @@ export default [
         name: "overpass-ts",
         file: "dist/overpass-ts.js",
         format: "umd",
-        exports: "default"
+        exports: "default",
       },
     ],
-    external: ["isomorphic-fetch"],
     plugins: [typescript()],
+  },
+  {
+    input: "src/node.ts",
+    external: ["isomorphic-fetch"],
+    output: {
+      name: "overpass-ts",
+      file: "dist/overpass-ts.node.js",
+      format: "es",
+      globals: {
+        "cross-fetch": "fetch",
+      },
+    },
+    plugins: [typescript()]
   },
 ];

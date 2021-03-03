@@ -2,8 +2,9 @@
   "name": "overpass-ts",
   "version": "4.0.0",
   "description": "",
-  "main": "dist/overpass-ts.js",
+  "main": "dist/overpass-ts.node.js",
   "types": "dist/overpass-ts.d.ts",
+  "browser": "dist/overpass-ts.js",
   "files": [
     "dist"
   ],
