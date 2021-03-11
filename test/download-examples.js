@@ -133,8 +133,7 @@ const overpassToDisk = async function (
   // out count
   await overpassToDisk(
     `[out:json]; node(${testElements["node"]}); out count;`,
-    `${outDir}/count.json`,
-    true
+    `${outDir}/count.json`
   );
 
   // timeout example
