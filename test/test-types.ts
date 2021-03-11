@@ -7,16 +7,18 @@ import type {
   OverpassTimeline,
   OverpassRelation,
   OverpassElement,
+  OverpassCount,
   OverpassNode,
   OverpassWay,
 } from "../src/types";
 
 function jsonFromFile(path: string) {
-  return JSON.parse(fs.readFileSync(path, {encoding: "utf8"}));
+  return JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
 }
 
 const relations = jsonFromFile("./test/examples/relation.json");
 const timelines = jsonFromFile("./test/examples/timeline.json");
+const counts = jsonFromFile("./test/examples/count.json");
 const nodes = jsonFromFile("./test/examples/node.json");
 const ways = jsonFromFile("./test/examples/way.json");
 
@@ -46,6 +48,11 @@ describe("TypeScript Types", function () {
       for (const timeline of timelines.elements) {
         timeline as OverpassElement;
         timeline as OverpassTimeline;
+      }
+
+      for (const count of counts.elements) {
+        count as OverpassElement;
+        count as OverpassCount;
       }
     });
   });

@@ -8,7 +8,11 @@ export interface OverpassJson {
     copyright: string;
   };
   elements: Array<
-    OverpassNode | OverpassWay | OverpassRelation | OverpassTimeline
+    | OverpassNode
+    | OverpassWay
+    | OverpassRelation
+    | OverpassTimeline
+    | OverpassCount
   >;
   remark?: string;
 }
@@ -18,7 +22,7 @@ export interface OverpassJson {
 //
 
 export interface OverpassElement {
-  type: "node" | "way" | "relation" | "timeline";
+  type: "node" | "way" | "relation" | "timeline" | "count";
   id: number;
 }
 
@@ -93,6 +97,20 @@ export interface OverpassTimeline extends OverpassElement {
     refversion: string;
     created: string;
     expired?: string;
+  };
+}
+
+//
+// Count
+//
+
+export interface OverpassCount extends OverpassElement {
+  type: "count";
+  tags: {
+    nodes: string;
+    ways: string;
+    relations: string;
+    total: string;
   };
 }
 

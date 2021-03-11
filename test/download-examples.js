@@ -1,5 +1,5 @@
 const fs = require("fs");
-const fetch = require("cross-fetch");
+const fetch = require("isomorphic-fetch");
 
 const date = "2021-02-22T16:20:00Z";
 
@@ -127,6 +127,13 @@ const overpassToDisk = async function (
   await overpassToDisk(
     `[out:xml]; this aint gonna work`,
     `${outDir}/400-bad-request.txt`,
+    true
+  );
+
+  // out count
+  await overpassToDisk(
+    `[out:json]; node(${testElements["node"]}); out count;`,
+    `${outDir}/count.json`,
     true
   );
 
