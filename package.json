@@ -1,6 +1,6 @@
 {
   "name": "overpass-ts",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "",
   "main": "dist/overpass-ts.js",
   "module": "dist/overpass-ts.module.js",
