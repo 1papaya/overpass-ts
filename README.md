@@ -29,7 +29,7 @@ Returns:
 ## example
 ```ts
 import type { OverpassJson } from "overpass-ts";
-import overpass from "overpass-ts";
+import { overpass } from "overpass-ts";
 
 // json request
 overpass(`[out:json]; node(626639517); out ids;`).then((json) => {

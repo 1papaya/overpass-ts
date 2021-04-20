@@ -49,7 +49,7 @@ const defaultOpts: OverpassOptions = {
   },
 };
 
-export default function overpass(
+export function overpass(
   query: string,
   opts: OverpassOptions = {}
 ): Promise<OverpassResponse | Readable | ReadableStream> {
