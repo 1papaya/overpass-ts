@@ -1,37 +1,10 @@
-import type { OverpassResponse } from "./types";
+import type { OverpassJson, OverpassResponse, OverpassOptions } from "./types";
 import type { Readable } from "stream";
 
 import "isomorphic-fetch";
 import { humanReadableBytes, matchAll, sleep } from "./utils";
 
 export * from "./types";
-
-interface OverpassOptions {
-  /**
-   * Overpass API endpoint URL (usually ends in /interpreter)
-   */
-  endpoint?: string;
-  /**
-   * How many retries when rate limit/gateway timeout before giving up?
-   */
-  rateLimitRetries?: number;
-  /**
-   * Pause in between receiving a rate limited response and initiating a retry
-   */
-  rateLimitPause?: number;
-  /**
-   * Output verbose query information
-   */
-  verbose?: boolean;
-  /**
-   * Return a stream.Readable (in Node) or ReadableStream (in browser)
-   */
-  stream?: boolean;
-  /**
-   * Options to be passed to fetch, will overwrite all defaults
-   */
-  fetchOpts?: object;
-}
 
 const defaultOpts: OverpassOptions = {
   endpoint: "//overpass-api.de/api/interpreter",
@@ -133,6 +106,27 @@ export function overpass(
       }
     }
   );
+}
+
+export function overpassJson(
+  query: string,
+  opts: OverpassOptions = {}
+): Promise<OverpassResponse | Readable | ReadableStream> {
+  return overpass(query, opts).then((resp) => resp as OverpassJson);
+}
+
+export function overpassXml(
+  query: string,
+  opts: OverpassOptions = {}
+): Promise<OverpassResponse | Readable | ReadableStream> {
+  return overpass(query, opts).then((resp) => resp as string);
+}
+
+export function overpassStream(
+  query: string,
+  opts: OverpassOptions = {}
+): Promise<OverpassResponse | Readable | ReadableStream> {
+  return overpass(query, opts).then((resp) => resp as string);
 }
 
 class OverpassError extends Error {
