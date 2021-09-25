@@ -2,6 +2,7 @@ import type { OverpassResponse } from "./types";
 import type { Readable } from "stream";
 
 import "isomorphic-fetch";
+import { humanReadableBytes, matchAll, sleep } from "./utils";
 
 export * from "./types";
 
@@ -77,7 +78,7 @@ export function overpass(
         // status = 200
         if (overpassOpts.verbose && resp.headers.has("content-length"))
           console.debug(
-            `payload: ${_humanReadableBytes(
+            `payload: ${humanReadableBytes(
               parseInt(resp.headers.get("content-length") as string)
             )}`
           );
@@ -98,7 +99,7 @@ export function overpass(
         if (resp.status === 400) {
           // bad request
           const errorHtml = await resp.text();
-          const errors = _matchAll(/<\/strong>: ([^<]+) <\/p>/g, errorHtml);
+          const errors = matchAll(/<\/strong>: ([^<]+) <\/p>/g, errorHtml);
 
           throw new Error(
             ["400 Bad Request", "Query:", query, "Errors:", ...errors].join(
@@ -118,7 +119,7 @@ export function overpass(
               `${resp.status} ${resp.statusText}. Retry #${overpassOpts.rateLimitRetries}`
             );
 
-          return _sleep(overpassOpts.rateLimitPause as number).then(async () =>
+          return sleep(overpassOpts.rateLimitPause as number).then(async () =>
             overpass(
               query,
               Object.assign({}, opts, {
@@ -138,24 +139,4 @@ class OverpassError extends Error {
   constructor(message: string) {
     super(`Overpass Error: ${message}`);
   }
-}
-
-const _humanReadableBytes = (bytes: number) => {
-  return bytes > 1024 * 1024
-    ? `${Math.round((bytes / (1024 * 1024)) * 100) / 100}MiB`
-    : `${Math.round((bytes / 1024) * 100) / 100}KiB`;
-};
-
-const _matchAll = (regex: RegExp, string: string) => {
-  let match,
-    matches = [];
-  while ((match = regex.exec(string))) matches.push(match[1]);
-
-  return matches;
-};
-
-function _sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }
