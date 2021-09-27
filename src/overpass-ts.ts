@@ -26,7 +26,7 @@ const defaultOpts: OverpassOptions = {
 export function overpass(
   query: string,
   opts: OverpassOptions = {}
-): Promise<OverpassResponse | Readable | ReadableStream> {
+): Promise<Response> {
   let { fetchOpts, ...overpassOpts } = JSON.parse(JSON.stringify(opts));
   let body = `data=${encodeURIComponent(query)}`;
 
@@ -47,28 +47,8 @@ export function overpass(
 
   return fetch(overpassOpts.endpoint as string, fetchOpts).then(
     async (resp) => {
-      if (resp.ok) {
-        // status = 200
-        if (overpassOpts.verbose && resp.headers.has("content-length"))
-          console.debug(
-            `payload: ${humanReadableBytes(
-              parseInt(resp.headers.get("content-length") as string)
-            )}`
-          );
-
-        if (overpassOpts.stream) return resp.body;
-
-        if (resp.headers.get("content-type") === "application/json") {
-          const json = await resp.json();
-
-          if (!!json && "remark" in json && opts.verbose)
-            console.debug(json.remark);
-
-          return json;
-        } else {
-          return resp.text();
-        }
-      } else {
+      // handle non-200 errors
+      if (!resp.ok) {
         if (resp.status === 400) {
           // bad request
           const errorHtml = await resp.text();
@@ -92,7 +72,7 @@ export function overpass(
               `${resp.status} ${resp.statusText}. Retry #${overpassOpts.rateLimitRetries}`
             );
 
-          return sleep(overpassOpts.rateLimitPause as number).then(async () =>
+          return sleep(overpassOpts.rateLimitPause as number).then(() =>
             overpass(
               query,
               Object.assign({}, opts, {
@@ -104,6 +84,16 @@ export function overpass(
           throw new OverpassError(`${resp.status} ${resp.statusText}`);
         }
       }
+
+      // print out response size if verbose
+      if (overpassOpts.verbose && resp.headers.has("content-length"))
+        console.debug(
+          `payload: ${humanReadableBytes(
+            parseInt(resp.headers.get("content-length") as string)
+          )}`
+        );
+
+      return resp;
     }
   );
 }
@@ -111,22 +101,29 @@ export function overpass(
 export function overpassJson(
   query: string,
   opts: OverpassOptions = {}
-): Promise<OverpassResponse | Readable | ReadableStream> {
-  return overpass(query, opts).then((resp) => resp as OverpassJson);
+): Promise<OverpassResponse> {
+  return overpass(query, opts)
+    .then((resp) => resp.json())
+    .then((json) => {
+      if (json && "remark" in json && opts.verbose) console.debug(json.remark);
+      return json as OverpassJson;
+    });
 }
 
 export function overpassXml(
   query: string,
   opts: OverpassOptions = {}
-): Promise<OverpassResponse | Readable | ReadableStream> {
-  return overpass(query, opts).then((resp) => resp as string);
+): Promise<string> {
+  return overpass(query, opts)
+    .then((resp) => resp.text())
+    .then((text) => text as string);
 }
 
 export function overpassStream(
   query: string,
   opts: OverpassOptions = {}
-): Promise<OverpassResponse | Readable | ReadableStream> {
-  return overpass(query, opts).then((resp) => resp as string);
+): Promise<Readable | ReadableStream> {
+  return overpass(query, opts).then((resp) => resp.body as ReadableStream);
 }
 
 class OverpassError extends Error {
