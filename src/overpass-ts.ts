@@ -1,4 +1,4 @@
-import type { OverpassJson, OverpassResponse, OverpassOptions } from "./types";
+import type { OverpassJson, OverpassOptions } from "./types";
 import type { Readable } from "stream";
 
 import "isomorphic-fetch";

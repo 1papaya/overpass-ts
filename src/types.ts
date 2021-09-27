@@ -29,8 +29,6 @@ export interface OverpassOptions {
 // Overpass API Response types
 //
 
-export type OverpassResponse = OverpassJson | string;
-
 export interface OverpassJson {
   version: number;
   generator: string;
