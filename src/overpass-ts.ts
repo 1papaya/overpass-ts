@@ -63,7 +63,7 @@ export function overpass(
           // retry if too many requests / gateway timeout
 
           if (overpassOpts.rateLimitRetries === 0)
-            throw new OverpassError(
+            throw new OverpassRateLimitError(
               `${resp.status} ${resp.statusText}. Retries Exhausted.`
             );
 
@@ -129,5 +129,11 @@ export function overpassStream(
 class OverpassError extends Error {
   constructor(message: string) {
     super(`Overpass Error: ${message}`);
+  }
+}
+
+class OverpassRateLimitError extends OverpassError {
+  constructor(message: string) {
+    super(message);
   }
 }
