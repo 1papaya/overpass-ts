@@ -101,7 +101,7 @@ export function overpass(
 export function overpassJson(
   query: string,
   opts: OverpassOptions = {}
-): Promise<OverpassResponse> {
+): Promise<OverpassJson> {
   return overpass(query, opts)
     .then((resp) => resp.json())
     .then((json) => {
