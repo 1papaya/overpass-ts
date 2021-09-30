@@ -1,0 +1,24 @@
+{
+  "url": "https://overpass-api.de/api/interpreter",
+  "statusText": "OK",
+  "status": 200,
+  "redirected": false,
+  "headers": {
+    "connection": "close",
+    "content-encoding": "gzip",
+    "content-length": "286",
+    "content-type": "application/osm3s+xml",
+    "date": "Thu, 30 Sep 2021 15:51:36 GMT",
+    "server": "Apache/2.4.18 (Ubuntu)",
+    "vary": "Accept-Encoding"
+  }
+}
+
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API 0.7.56.9 76e5016d">
+<note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
+<meta osm_base="2021-09-30T14:00:52Z"/>
+
+<remark> runtime error: Query run out of memory using about 2048 MB of RAM. </remark>
+
+</osm>

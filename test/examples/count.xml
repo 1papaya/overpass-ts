@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API 0.7.56.9 76e5016d">
+<note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
+<meta osm_base="2021-09-30T14:00:52Z"/>
+
+  <count id="0">
+    <tag k="nodes" v="1"/>
+    <tag k="ways" v="0"/>
+    <tag k="relations" v="0"/>
+    <tag k="total" v="1"/>
+  </count>
+
+</osm>
