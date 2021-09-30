@@ -39,17 +39,21 @@ export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
     const lineFirstWord = statusLine.split(" ")[0];
     if (lineFirstWord == "Connected") status["clientId"] = statusLine.slice(14);
     else if (lineFirstWord == "Current")
-      status["currentTime"] = Date.parse(statusLine.slice(14));
+      status["currentTime"] = statusLine.slice(14);
     else if (lineFirstWord == "Rate")
       status["rateLimit"] = parseInt(statusLine.slice(12));
     else if (lineFirstWord == "Slot")
-      status["slotsAvailableAfter"].append(
+      status["slotsAvailableAfter"].push(
         parseInt(statusLine.slice(47).split(" ")[0])
       );
     // any lines not "Currently running queries" or "# slots available now"
-    // count those as slots running lines
-    else if (lineFirstWord != "Currently" && !statusLine.includes("available"))
-      status["slotsRunning"].append(statusLine.split("\t"));
+    // or empty, count those as slots running lines
+    else if (
+      lineFirstWord != "Currently" &&
+      !statusLine.includes("available") &&
+      statusLine !== ""
+    )
+      status["slotsRunning"].push(statusLine.split("\t"));
   });
 
   return status;
