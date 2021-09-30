@@ -169,29 +169,51 @@ export function overpassStream(
 
 export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
   fetch(endpoint.replace("/interpreter", "/status"))
-    .then((resp) => resp.text())
-    .then((statusHtml) => utils.parseApiStatus(statusHtml));
+    .then((resp) => {
+      const responseType = resp.headers.get("content-type");
 
-class OverpassError extends Error {
+      if (!responseType || responseType.split(";")[0] !== "text/plain")
+        throw new OverpassApiStatusError(
+          `Response type incorrect (${responseType})`
+        );
+
+      return resp.text();
+    })
+    .then((statusHtml) => {
+      const apiStatus = utils.parseApiStatus(statusHtml);
+
+      if (!("clientId" in apiStatus))
+        throw new OverpassApiStatusError(`Unable to parse API Status`);
+
+      return apiStatus;
+    });
+
+export class OverpassError extends Error {
   constructor(message: string) {
     super(`Overpass Error: ${message}`);
   }
 }
 
-class OverpassRateLimitError extends OverpassError {
+export class OverpassRateLimitError extends OverpassError {
   constructor() {
     super("429 Rate Limit Exceeded");
   }
 }
 
-class OverpassBadRequestError extends OverpassError {
+export class OverpassBadRequestError extends OverpassError {
   constructor(query: string, errors: string[]) {
     super(`400 Bad Request\n  Query: ${query}\n  Errors: ${errors.join("\n")}`);
   }
 }
 
-class OverpassGatewayTimeoutError extends OverpassError {
+export class OverpassGatewayTimeoutError extends OverpassError {
   constructor() {
     super("504 Gateway Timeout");
+  }
+}
+
+export class OverpassApiStatusError extends OverpassError {
+  constructor(message: string) {
+    super(`API Status error: ${message}`);
   }
 }
