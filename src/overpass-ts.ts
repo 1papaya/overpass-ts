@@ -153,6 +153,13 @@ export function overpassXml(
     });
 }
 
+export function overpassCsv(
+  query: string,
+  opts: Partial<OverpassOptions> = {}
+): Promise<string> {
+  return overpass(query, opts).then((resp) => resp.text());
+}
+
 export function overpassStream(
   query: string,
   opts: Partial<OverpassOptions> = {}
