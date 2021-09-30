@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import * as fs from "fs";
 
 import type {
   OverpassJson,
@@ -12,9 +11,7 @@ import type {
   OverpassWay,
 } from "../src/types";
 
-function jsonFromFile(path: string) {
-  return JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
-}
+import { jsonFromFile } from "./common";
 
 const relations = jsonFromFile("./test/examples/relation.json");
 const timelines = jsonFromFile("./test/examples/timeline.json");
