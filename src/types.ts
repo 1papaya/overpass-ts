@@ -2,27 +2,31 @@ export interface OverpassOptions {
   /**
    * Overpass API endpoint URL (usually ends in /interpreter)
    */
-  endpoint?: string;
+  endpoint: string;
   /**
    * How many retries when rate limit/gateway timeout before giving up?
    */
-  rateLimitRetries?: number;
+  numRetries: number;
   /**
    * Pause in between receiving a rate limited response and initiating a retry
    */
-  rateLimitPause?: number;
+  retryPause: number;
   /**
    * Output verbose query information
    */
-  verbose?: boolean;
+  verbose: boolean;
   /**
-   * Return a stream.Readable (in Node) or ReadableStream (in browser)
+   * User-agent to send on Overpass Request
    */
-  stream?: boolean;
-  /**
-   * Options to be passed to fetch, will overwrite all defaults
-   */
-  fetchOpts?: object;
+  userAgent: string;
+}
+
+export interface OverpassApiStatus {
+  clientId: string;
+  currentTime: Date;
+  rateLimit: number;
+  slotsAvailableAfter: number[];
+  slotsRunning: string[];
 }
 
 //

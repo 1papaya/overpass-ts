@@ -1,7 +1,7 @@
 {
   "name": "overpass-ts",
   "version": "4.2.4",
-  "description": "",
+  "description": "typescript overpass api",
   "main": "dist/overpass-ts.js",
   "module": "dist/overpass-ts.module.js",
   "browser": "dist/overpass-ts.browser.js",
@@ -10,12 +10,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist/* && rollup -c && cd src && tsc -d --emitDeclarationOnly --declarationDir ../dist/",
+    "clean": "rm -rf dist/*",
+    "build:src": "rollup -c",
+    "build:types": "cd src && tsc -d --emitDeclarationOnly --declarationDir ../dist/",
+    "build": "npm run clean && npm run build:src && npm run build:types",
     "download-examples": "node test/download-examples.js",
     "test": "mocha --timeout 360000 test/test-*.ts"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "1papaya",
+  "license": "MIT",
   "dependencies": {
     "isomorphic-fetch": "^3.0.0"
   },

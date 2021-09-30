@@ -1,129 +1,169 @@
 import type { OverpassJson, OverpassOptions } from "./types";
 import type { Readable } from "stream";
 
-import "isomorphic-fetch";
-import { humanReadableBytes, matchAll, sleep } from "./utils";
+import { main as mainEndpoint } from "./endpoints";
 
+import * as utils from "./utils";
 export * from "./types";
 
+import "isomorphic-fetch";
+
 const defaultOpts: OverpassOptions = {
-  endpoint: "//overpass-api.de/api/interpreter",
-  rateLimitRetries: 2,
-  rateLimitPause: 2000,
+  endpoint: mainEndpoint,
+  numRetries: 1,
+  retryPause: 2000,
   verbose: false,
-  stream: false,
-  fetchOpts: {
+  userAgent: "overpass-ts",
+};
+
+export function overpass(
+  query: string,
+  overpassOpts: Partial<OverpassOptions> = {}
+): Promise<Response> {
+  const opts = Object.assign({}, defaultOpts, overpassOpts);
+
+  if (opts.verbose) {
+    utils.consoleMsg(`endpoint: ${opts.endpoint}`);
+    utils.consoleMsg(`query: ${query}`);
+  }
+
+  const fetchOpts = {
+    body: `data=${encodeURIComponent(query)}`,
     method: "POST",
     mode: "cors",
     redirect: "follow",
     headers: {
       Accept: "*",
-      "User-Agent": "overpass-ts",
+      "User-Agent": opts.userAgent,
     },
-  },
-};
+  } as RequestInit;
 
-export function overpass(
-  query: string,
-  opts: OverpassOptions = {}
-): Promise<Response> {
-  let { fetchOpts, ...overpassOpts } = JSON.parse(JSON.stringify(opts));
-  let body = `data=${encodeURIComponent(query)}`;
+  return fetch(opts.endpoint, fetchOpts).then(async (resp) => {
+    // handle non-200 errors
+    if (!resp.ok) {
+      if (resp.status === 400) {
+        // 400 bad request
 
-  // full overwrite of fetch options if specificed by user
-  fetchOpts =
-    typeof fetchOpts === "undefined"
-      ? Object.assign({ body }, defaultOpts.fetchOpts)
-      : Object.assign({ body }, opts.fetchOpts);
+        // if bad request, error details sent along as html
+        // load the html and parse it for detailed error
 
-  // merge passed options with default opts
-  if (typeof overpassOpts !== "undefined")
-    overpassOpts = Object.assign({}, defaultOpts, overpassOpts);
-
-  if (opts.verbose) {
-    console.debug(`endpoint: ${overpassOpts.endpoint}`);
-    console.debug(`query: ${query}`);
-  }
-
-  return fetch(overpassOpts.endpoint as string, fetchOpts).then(
-    async (resp) => {
-      // handle non-200 errors
-      if (!resp.ok) {
-        if (resp.status === 400) {
-          // bad request
-          const errorHtml = await resp.text();
-          const errors = matchAll(/<\/strong>: ([^<]+) <\/p>/g, errorHtml);
-
-          throw new Error(
-            ["400 Bad Request", "Query:", query, "Errors:", ...errors].join(
-              "\n"
-            )
-          );
-        } else if (resp.status === 429 || resp.status === 504) {
-          // retry if too many requests / gateway timeout
-
-          if (overpassOpts.rateLimitRetries === 0)
-            throw new OverpassRateLimitError(
-              `${resp.status} ${resp.statusText}. Retries Exhausted.`
-            );
-
-          if (overpassOpts.verbose)
-            console.debug(
-              `${resp.status} ${resp.statusText}. Retry #${overpassOpts.rateLimitRetries}`
-            );
-
-          return sleep(overpassOpts.rateLimitPause as number).then(() =>
-            overpass(
-              query,
-              Object.assign({}, opts, {
-                rateLimitRetries: (overpassOpts.rateLimitRetries as number) - 1,
-              })
-            )
-          );
-        } else {
-          throw new OverpassError(`${resp.status} ${resp.statusText}`);
-        }
-      }
-
-      // print out response size if verbose
-      if (overpassOpts.verbose && resp.headers.has("content-length"))
-        console.debug(
-          `payload: ${humanReadableBytes(
-            parseInt(resp.headers.get("content-length") as string)
-          )}`
+        const errors = utils.matchAll(
+          /<\/strong>: ([^<]+) <\/p>/g,
+          await resp.text()
         );
 
-      return resp;
+        throw new OverpassBadRequestError(query, errors);
+      } else if (resp.status === 429) {
+        // 429 too many requests
+
+        if (opts.numRetries == 0) throw new OverpassRateLimitError();
+
+        return fetch(opts.endpoint.replace("/interpreter", "/status"))
+          .then((resp) => resp.text())
+          .then((apiStatusText) => {
+            const apiStatus = utils.parseApiStatus(apiStatusText);
+
+            // if there are more slots available than what's being used +
+            // rate limit, resend the request immediately
+            // if rate limit == 0 is unlimited
+            if (
+              apiStatus.rateLimit >
+                apiStatus.slotsAvailableAfter.length +
+                  apiStatus.slotsRunning.length ||
+              apiStatus.rateLimit == 0
+            )
+              return overpass(query, utils.oneLessRetry(opts));
+            // if all slots are rate limited, pause until first rate limit over
+            else {
+              const lowestWaitTime =
+                Math.min(0, ...apiStatus.slotsAvailableAfter) + 1;
+
+              if (opts.verbose)
+                utils.consoleMsg(
+                  `Waiting ${lowestWaitTime}s for rate limit end`
+                );
+
+              return utils
+                .sleep(lowestWaitTime * 1000)
+                .then(() => overpass(query, utils.oneLessRetry(opts)));
+            }
+          });
+      } else if (resp.status === 504) {
+        // 504 gateway timeout
+
+        if (opts.numRetries === 0) throw new OverpassGatewayTimeoutError();
+
+        return utils
+          .sleep(opts.retryPause)
+          .then(() => overpass(query, utils.oneLessRetry(opts)));
+      } else {
+        throw new OverpassError(`${resp.status} ${resp.statusText}`);
+      }
     }
-  );
+
+    // print out response size if verbose
+    if (opts.verbose && resp.headers.has("content-length"))
+      console.debug(
+        `payload: ${utils.humanReadableBytes(
+          parseInt(resp.headers.get("content-length") as string)
+        )}`
+      );
+
+    return resp;
+  });
 }
 
 export function overpassJson(
   query: string,
-  opts: OverpassOptions = {}
+  opts: Partial<OverpassOptions> = {}
 ): Promise<OverpassJson> {
   return overpass(query, opts)
     .then((resp) => resp.json())
-    .then((json) => {
-      if (json && "remark" in json && opts.verbose) console.debug(json.remark);
-      return json as OverpassJson;
+    .then((json: OverpassJson) => {
+      // https://github.com/drolbr/Overpass-API/issues/94
+      // a "remark" in the output means an error occurred after
+      // the HTTP status code has already been sent
+
+      if (json.remark) throw new OverpassError(json["remark"]);
+      else return json as OverpassJson;
     });
 }
 
 export function overpassXml(
   query: string,
-  opts: OverpassOptions = {}
+  opts: Partial<OverpassOptions> = {}
 ): Promise<string> {
   return overpass(query, opts)
     .then((resp) => resp.text())
-    .then((text) => text as string);
+    .then((text) => {
+      // https://github.com/drolbr/Overpass-API/issues/94
+      // a "remark" in the output means an error occurred after
+      // the HTTP status code has already been sent
+
+      // </remark> will always be at end of output, at same position
+      if (text.slice(-18, -9) === "</remark>") {
+        const textLines = text.split("\n");
+        const errors = [];
+
+        // loop backwards thru text lines skipping first 4 lines
+        // collect each remark (there can be multiple)
+        // break once remark is not found / returned
+        for (let i = textLines.length - 4; i > 0; i--) {
+          const remark = textLines[i].match(/<remark>\s*(.+)\s*<\/remark>/);
+          if (remark) errors.push(remark[1]);
+          else break;
+        }
+
+        throw new OverpassError(errors.join(", "));
+      } else return text as string;
+    });
 }
 
 export function overpassStream(
   query: string,
-  opts: OverpassOptions = {}
-): Promise<Readable | ReadableStream> {
-  return overpass(query, opts).then((resp) => resp.body as ReadableStream);
+  opts: Partial<OverpassOptions> = {}
+): Promise<Readable | ReadableStream | null> {
+  return overpass(query, opts).then((resp) => resp.body);
 }
 
 class OverpassError extends Error {
@@ -133,7 +173,19 @@ class OverpassError extends Error {
 }
 
 class OverpassRateLimitError extends OverpassError {
-  constructor(message: string) {
-    super(message);
+  constructor() {
+    super("429 Rate Limit Exceeded");
+  }
+}
+
+class OverpassBadRequestError extends OverpassError {
+  constructor(query: string, errors: string[]) {
+    super(`400 Bad Request\n  Query: ${query}\n  Errors: ${errors.join("\n")}`);
+  }
+}
+
+class OverpassGatewayTimeoutError extends OverpassError {
+  constructor() {
+    super("504 Gateway Timeout");
   }
 }
