@@ -1,0 +1,55 @@
+[
+  {
+    "text": "Connected as: 174940356\nCurrent time: 2021-09-29T11:45:40Z\nRate limit: 0\nCurrently running queries (pid, space limit, time limit, start time):",
+    "status": {
+      "clientId": "174940356",
+      "currentTime": "2021-09-29T11:45:40Z",
+      "rateLimit": 0,
+      "slotsAvailableAfter": [],
+      "slotsRunning": []
+    }
+  },
+  {
+    "text": "Connected as: 1520950174\nCurrent time: 2021-09-29T11:50:05Z\nRate limit: 2\nSlot available after: 2021-09-29T11:57:07Z, in 422 seconds.\nCurrently running queries (pid, space limit, time limit, start time):\n20236\t536870912\t180\t2021-09-29T11:49:58Z",
+    "status": {
+      "clientId": "1520950174",
+      "currentTime": "2021-09-29T11:50:05Z",
+      "rateLimit": 2,
+      "slotsAvailableAfter": [422],
+      "slotsRunning": [["20236", "536870912", "180", "2021-09-29T11:49:58Z"]]
+    }
+  },
+  {
+    "text": "Connected as: 1520950174\nCurrent time: 2021-09-29T11:50:47Z\nRate limit: 2\nSlot available after: 2021-09-29T11:57:07Z, in 380 seconds.\nSlot available after: 2021-09-29T11:58:05Z, in 438 seconds.\nCurrently running queries (pid, space limit, time limit, start time):\n",
+    "status": {
+      "clientId": "1520950174",
+      "currentTime": "2021-09-29T11:50:47Z",
+      "rateLimit": 2,
+      "slotsAvailableAfter": [380, 438],
+      "slotsRunning": []
+    }
+  },
+  {
+    "text": "Connected as: 1520950174\nCurrent time: 2021-09-29T11:52:46Z\nRate limit: 2\n1 slots available now.\nCurrently running queries (pid, space limit, time limit, start time):\n26880\t536870912\t180\t2021-09-29T11:52:45Z",
+    "status": {
+      "clientId": "1520950174",
+      "currentTime": "2021-09-29T11:52:46Z",
+      "rateLimit": 2,
+      "slotsAvailableAfter": [],
+      "slotsRunning": [["26880", "536870912", "180", "2021-09-29T11:52:45Z"]]
+    }
+  },
+  {
+    "text": "Connected as: 1520950174\nCurrent time: 2021-09-29T11:53:01Z\nRate limit: 2\nCurrently running queries (pid, space limit, time limit, start time):\n26880\t536870912\t180\t2021-09-29T11:52:45Z\n28627\t536870912\t180\t2021-09-29T11:53:00Z",
+    "status": {
+      "clientId": "1520950174",
+      "currentTime": "2021-09-29T11:53:01Z",
+      "rateLimit": 2,
+      "slotsAvailableAfter": [],
+      "slotsRunning": [
+        ["26880", "536870912", "180", "2021-09-29T11:52:45Z"],
+        ["28627", "536870912", "180", "2021-09-29T11:53:00Z"]
+      ]
+    }
+  }
+]
