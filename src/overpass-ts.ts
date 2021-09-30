@@ -23,8 +23,8 @@ export function overpass(
   const opts = Object.assign({}, defaultOpts, overpassOpts);
 
   if (opts.verbose) {
-    utils.consoleMsg(`endpoint: ${opts.endpoint}`);
-    utils.consoleMsg(`query: ${query}`);
+    utils.consoleMsg(`endpoint ${opts.endpoint}`);
+    utils.consoleMsg(`query ${query}`);
   }
 
   const fetchOpts = {
@@ -75,7 +75,7 @@ export function overpass(
               Math.min(0, ...apiStatus.slotsAvailableAfter) + 1;
 
             if (opts.verbose)
-              utils.consoleMsg(`Waiting ${lowestWaitTime}s for rate limit end`);
+              utils.consoleMsg(`waiting ${lowestWaitTime}s for rate limit end`);
 
             return utils
               .sleep(lowestWaitTime * 1000)
@@ -97,8 +97,8 @@ export function overpass(
 
     // print out response size if verbose
     if (opts.verbose && resp.headers.has("content-length"))
-      console.debug(
-        `payload: ${utils.humanReadableBytes(
+      utils.consoleMsg(
+        `response payload ${utils.humanReadableBytes(
           parseInt(resp.headers.get("content-length") as string)
         )}`
       );
