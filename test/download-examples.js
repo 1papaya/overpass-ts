@@ -99,28 +99,17 @@ const overpassToDisk = async function (
   }
 
   // timeline examples
-  await overpassToDisk(
-    `[out:json][date:"${date}"];
-     timeline(node, ${testElements["node"]});
-     timeline(way, ${testElements["way"]});
-     timeline(relation, ${testElements["relation"]}); out;`,
-    `${outDir}/timeline.json`
-  );
 
-  // json xml headers
-  for (const format of ["json", "xml"]) {
-    await overpassToDisk(
-      `[out:${format}]; node(${testElements["node"]}); out geom;`,
-      `${outDir}/headers-${format}.txt`,
-      true
-    );
-  }
-
-  // csv response
-  await overpassToDisk(
-    `[out:csv(::type)]; node(${testElements["node"]});`,
-    `${outDir}/headers-csv.txt`,
-    true
+  await Promise.all(
+    ["json", "xml"].map((outType) =>
+      overpassToDisk(
+        `[out:${outType}][date:"${date}"];
+       timeline(node, ${testElements["node"]});
+       timeline(way, ${testElements["way"]});
+       timeline(relation, ${testElements["relation"]}); out;`,
+        `${outDir}/timeline.${outType}`
+      )
+    )
   );
 
   // bad request example
@@ -131,28 +120,27 @@ const overpassToDisk = async function (
   );
 
   // out count
-  await overpassToDisk(
-    `[out:json]; node(${testElements["node"]}); out count;`,
-    `${outDir}/count.json`
+
+  await Promise.all(
+    ["json", "xml"].map((outType) =>
+      overpassToDisk(
+        `[out:${outType}]; node(${testElements["node"]}); out count;`,
+        `${outDir}/count.${outType}`
+      )
+    )
   );
 
   // timeout example
-  await overpassToDisk(
-    `[out:json][timeout:1]; way[highway]; out geom;`,
-    `${outDir}/timeout.json`,
-    true
-  );
 
-  // rate limit example
-  for (let i = 0; i < 10; i++) {
-    overpassToDisk(
-      `[out:xml]; way[highway]; out geom;`,
-      `${outDir}/429-too-many-requests-${i}.txt`,
-      true
-    ).then(() => {
-      fs.unlinkSync(`${outDir}/429-too-many-requests-${i}.txt`);
-    });
-  }
+  await Promise.all(
+    ["json", "xml"].map((outType) =>
+      overpassToDisk(
+        `[out:${outType}][timeout:1]; way[highway]; out geom;`,
+        `${outDir}/timeout.${outType}`,
+        true
+      )
+    )
+  );
 
   overpassToDisk(
     `[out:xml]; node(${testElements["node"]}); out geom;`,
