@@ -1,4 +1,4 @@
-import type { OverpassJson, OverpassOptions } from "./types";
+import type { OverpassJson, OverpassApiStatus, OverpassOptions } from "./types";
 import type { Readable } from "stream";
 
 import { main as mainEndpoint } from "./endpoints";
@@ -54,40 +54,34 @@ export function overpass(
 
         throw new OverpassBadRequestError(query, errors);
       } else if (resp.status === 429) {
-        // 429 too many requests
+        // 429 too many requests / rate limited
 
         if (opts.numRetries == 0) throw new OverpassRateLimitError();
 
-        return fetch(opts.endpoint.replace("/interpreter", "/status"))
-          .then((resp) => resp.text())
-          .then((apiStatusText) => {
-            const apiStatus = utils.parseApiStatus(apiStatusText);
+        return apiStatus(opts.endpoint).then((apiStatus) => {
+          // if there are more slots available than being used
+          // resend the request immediately (this happens sometimes)
+          // if rate limit == 0 is unlimited
+          if (
+            apiStatus.rateLimit >
+              apiStatus.slotsAvailableAfter.length +
+                apiStatus.slotsRunning.length ||
+            apiStatus.rateLimit == 0
+          )
+            return overpass(query, utils.oneLessRetry(opts));
+          // if all slots are rate limited, pause until first rate limit over
+          else {
+            const lowestWaitTime =
+              Math.min(0, ...apiStatus.slotsAvailableAfter) + 1;
 
-            // if there are more slots available than what's being used +
-            // rate limit, resend the request immediately
-            // if rate limit == 0 is unlimited
-            if (
-              apiStatus.rateLimit >
-                apiStatus.slotsAvailableAfter.length +
-                  apiStatus.slotsRunning.length ||
-              apiStatus.rateLimit == 0
-            )
-              return overpass(query, utils.oneLessRetry(opts));
-            // if all slots are rate limited, pause until first rate limit over
-            else {
-              const lowestWaitTime =
-                Math.min(0, ...apiStatus.slotsAvailableAfter) + 1;
+            if (opts.verbose)
+              utils.consoleMsg(`Waiting ${lowestWaitTime}s for rate limit end`);
 
-              if (opts.verbose)
-                utils.consoleMsg(
-                  `Waiting ${lowestWaitTime}s for rate limit end`
-                );
-
-              return utils
-                .sleep(lowestWaitTime * 1000)
-                .then(() => overpass(query, utils.oneLessRetry(opts)));
-            }
-          });
+            return utils
+              .sleep(lowestWaitTime * 1000)
+              .then(() => overpass(query, utils.oneLessRetry(opts)));
+          }
+        });
       } else if (resp.status === 504) {
         // 504 gateway timeout
 
@@ -124,7 +118,7 @@ export function overpassJson(
       // a "remark" in the output means an error occurred after
       // the HTTP status code has already been sent
 
-      if (json.remark) throw new OverpassError(json["remark"]);
+      if (json.remark) throw new OverpassError(json.remark);
       else return json as OverpassJson;
     });
 }
@@ -147,7 +141,7 @@ export function overpassXml(
 
         // loop backwards thru text lines skipping first 4 lines
         // collect each remark (there can be multiple)
-        // break once remark is not found / returned
+        // break once remark is not matched
         for (let i = textLines.length - 4; i > 0; i--) {
           const remark = textLines[i].match(/<remark>\s*(.+)\s*<\/remark>/);
           if (remark) errors.push(remark[1]);
@@ -165,6 +159,11 @@ export function overpassStream(
 ): Promise<Readable | ReadableStream | null> {
   return overpass(query, opts).then((resp) => resp.body);
 }
+
+export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
+  fetch(endpoint.replace("/interpreter", "/status"))
+    .then((resp) => resp.text())
+    .then((statusHtml) => utils.parseApiStatus(statusHtml));
 
 class OverpassError extends Error {
   constructor(message: string) {

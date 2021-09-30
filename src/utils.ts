@@ -29,7 +29,7 @@ export const oneLessRetry = (opts: OverpassOptions) =>
     numRetries: opts.numRetries - 1,
   });
 
-export const parseApiStatus = (statusHtml: string) => {
+export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
   const status: any = {
     slotsRunning: [],
     slotsAvailableAfter: [],
@@ -47,10 +47,10 @@ export const parseApiStatus = (statusHtml: string) => {
         parseInt(statusLine.slice(47).split(" ")[0])
       );
     // any lines not "Currently running queries" or "# slots available now"
-    // count those as slots runng lines
+    // count those as slots running lines
     else if (lineFirstWord != "Currently" && !statusLine.includes("available"))
       status["slotsRunning"].append(statusLine.split("\t"));
   });
 
-  return status as OverpassApiStatus;
+  return status;
 };
