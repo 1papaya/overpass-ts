@@ -9,7 +9,7 @@ import {
 } from "../src/overpass-ts";
 import * as assert from "assert";
 
-describe("API Queries", function () {
+describe("Good API Queries", function () {
   it("200 stream request", function () {
     return overpassStream(`[out:json]; node(626639517); out geom;`, {
       endpoint: kumiEndpoint,
@@ -56,19 +56,5 @@ describe("API Queries", function () {
 
       console.log(xml);
     });
-  });
-
-  it("400 bad request", function () {
-    return overpassJson(`[out:json]; this aint gonna work`, {
-      endpoint: kumiEndpoint,
-      verbose: true,
-    }).catch((error) => console.log(error.message));
-  });
-
-  it("bad url", function () {
-    return overpassJson(`[out:json]; this aint gonna work`, {
-      verbose: true,
-      endpoint: "//aint-gonna-work",
-    }).catch((error) => console.log(error.message));
   });
 });
