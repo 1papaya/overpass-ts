@@ -49,7 +49,7 @@ export function overpass(
 
         const errors = utils
           .matchAll(/<\/strong>: ([^<]+) <\/p>/g, await resp.text())
-          .map((error) => error.replace("&quot;", '"'));
+          .map((error) => error.replaceAll("&quot;", '"'));
 
         throw new OverpassBadRequestError(query, errors);
       } else if (resp.status === 429) {
