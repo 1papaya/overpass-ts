@@ -47,10 +47,9 @@ export function overpass(
         // if bad request, error details sent along as html
         // load the html and parse it for detailed error
 
-        const errors = utils.matchAll(
-          /<\/strong>: ([^<]+) <\/p>/g,
-          await resp.text()
-        );
+        const errors = utils
+          .matchAll(/<\/strong>: ([^<]+) <\/p>/g, await resp.text())
+          .map((error) => error.replace("&quot;", '"'));
 
         throw new OverpassBadRequestError(query, errors);
       } else if (resp.status === 429) {
