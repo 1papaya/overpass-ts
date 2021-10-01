@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import { jsonFromFile } from "./common";
 import { parseApiStatus } from "../src/utils";
-import { apiStatus, OverpassApiStatusError } from "../src/overpass-ts";
+import { apiStatus, OverpassApiStatusError } from "../src/overpass";
 import { OverpassApiStatus } from "../src/types";
 import {
   kumi as kumiEndpoint,

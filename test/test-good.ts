@@ -1,4 +1,4 @@
-import type { OverpassJson } from "../src/overpass-ts";
+import type { OverpassJson } from "../src/overpass";
 import { kumi as kumiEndpoint } from "../src/endpoints";
 import * as nodeStream from "stream";
 import {
@@ -6,7 +6,7 @@ import {
   overpassCsv,
   overpassXml,
   overpassStream,
-} from "../src/overpass-ts";
+} from "../src/overpass";
 import * as assert from "assert";
 
 describe("Good API Queries", function () {

@@ -1,13 +1,7 @@
-import type { OverpassJson } from "../src/overpass-ts";
 import { kumi as kumiEndpoint } from "../src/endpoints";
-import * as nodeStream from "stream";
 import {
   overpassJson,
-  overpassCsv,
-  overpassXml,
-  overpassStream,
-} from "../src/overpass-ts";
-import * as assert from "assert";
+} from "../src/overpass";
 
 describe("Error API Queries", function () {
   it("400 bad request", function () {
