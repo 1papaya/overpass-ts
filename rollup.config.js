@@ -16,7 +16,7 @@ const removeIsometricFetchImport = replace({
 export default [
   // main bundle
   {
-    input: "src/overpass-ts.ts",
+    input: "src/index.ts",
     external: ["isomorphic-fetch"],
     output: {
       name: "overpass-ts",
@@ -27,7 +27,7 @@ export default [
   },
   // browser bundle
   {
-    input: "src/overpass-ts.ts",
+    input: "src/index.ts",
     output: {
       name: "overpass-ts",
       file: "dist/overpass-ts.browser.js",
@@ -37,7 +37,7 @@ export default [
   },
   // module bundle
   {
-    input: "src/overpass-ts.ts",
+    input: "src/index.ts",
     external: ["isometric-fetch"],
     output: [
       {
@@ -50,7 +50,7 @@ export default [
   },
   // standalone
   {
-    input: "src/overpass-ts.ts",
+    input: "src/index.ts",
     output: [
       {
         name: "overpass",

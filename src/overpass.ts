@@ -1,15 +1,15 @@
 import type { OverpassJson, OverpassApiStatus, OverpassOptions } from "./types";
 import type { Readable } from "stream";
 
-import { main as mainEndpoint } from "./endpoints";
-
+import * as endpoints from "./endpoints";
 import * as utils from "./utils";
-export * from "./types";
 
 import "isomorphic-fetch";
 
+export * from "./types";
+
 const defaultOpts: OverpassOptions = {
-  endpoint: mainEndpoint,
+  endpoint: endpoints.main,
   numRetries: 1,
   retryPause: 2000,
   verbose: false,
