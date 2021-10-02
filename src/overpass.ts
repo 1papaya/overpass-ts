@@ -16,7 +16,7 @@ const defaultOpts: OverpassOptions = {
   userAgent: "overpass-ts",
 };
 
-export function overpass(
+export async function overpass(
   query: string,
   overpassOpts: Partial<OverpassOptions> = {}
 ): Promise<Response> {
@@ -38,72 +38,85 @@ export function overpass(
     },
   } as RequestInit;
 
-  return fetch(opts.endpoint, fetchOpts).then(async (resp) => {
-    // handle non-200 errors
-    if (!resp.ok) {
-      if (resp.status === 400) {
-        // 400 bad request
+  try {
+    const apiResponse = await fetch(opts.endpoint, fetchOpts).then(
+      async (resp) => {
+        // handle non-200 errors
+        if (!resp.ok) {
+          if (resp.status === 400) {
+            // 400 bad request
 
-        // if bad request, error details sent along as html
-        // load the html and parse it for detailed error
+            // if bad request, error details sent along as html
+            // load the html and parse it for detailed error
 
-        const errors = utils
-          .matchAll(/<\/strong>: ([^<]+) <\/p>/g, await resp.text())
-          .map((error) => error.replace(/&quot;/g, '"'));
+            const errors = utils
+              .matchAll(/<\/strong>: ([^<]+) <\/p>/g, await resp.text())
+              .map((error) => error.replace(/&quot;/g, '"'));
 
-        throw new OverpassBadRequestError(query, errors);
-      } else if (resp.status === 429) {
-        // 429 too many requests / rate limited
+            throw new OverpassBadRequestError(query, errors);
+          } else if (resp.status === 429) {
+            // 429 too many requests / rate limited
 
-        if (opts.numRetries == 0) throw new OverpassRateLimitError();
+            if (opts.numRetries == 0) throw new OverpassRateLimitError();
 
-        return apiStatus(opts.endpoint).then((apiStatus) => {
-          // if there are more slots available than being used
-          // resend the request immediately (this happens sometimes)
-          // if rate limit == 0 is unlimited
-          if (
-            apiStatus.rateLimit >
-              apiStatus.slotsAvailableAfter.length +
-                apiStatus.slotsRunning.length ||
-            apiStatus.rateLimit == 0
-          )
-            return overpass(query, utils.oneLessRetry(opts));
-          // if all slots are rate limited, pause until first rate limit over
-          else {
-            const lowestWaitTime =
-              Math.min(0, ...apiStatus.slotsAvailableAfter) + 1;
+            return apiStatus(opts.endpoint).then((apiStatus) => {
+              // if there are more slots available than being used
+              // resend the request immediately (this happens sometimes)
+              // if rate limit == 0 is unlimited
+              if (
+                apiStatus.rateLimit >
+                  apiStatus.slotsAvailableAfter.length +
+                    apiStatus.slotsRunning.length ||
+                apiStatus.rateLimit == 0
+              )
+                return overpass(query, utils.oneLessRetry(opts));
+              // if all slots are rate limited, pause until first rate limit over
+              else {
+                const lowestWaitTime =
+                  Math.min(0, ...apiStatus.slotsAvailableAfter) + 1;
 
-            if (opts.verbose)
-              utils.consoleMsg(`waiting ${lowestWaitTime}s for rate limit end`);
+                if (opts.verbose)
+                  utils.consoleMsg(
+                    `waiting ${lowestWaitTime}s for rate limit end`
+                  );
+
+                return utils
+                  .sleep(lowestWaitTime * 1000)
+                  .then(() => overpass(query, utils.oneLessRetry(opts)));
+              }
+            });
+          } else if (resp.status === 504) {
+            // 504 gateway timeout
+
+            if (opts.numRetries === 0) throw new OverpassGatewayTimeoutError();
 
             return utils
-              .sleep(lowestWaitTime * 1000)
+              .sleep(opts.retryPause)
               .then(() => overpass(query, utils.oneLessRetry(opts)));
+          } else {
+            throw new OverpassError(`${resp.status} ${resp.statusText}`);
           }
-        });
-      } else if (resp.status === 504) {
-        // 504 gateway timeout
+        }
 
-        if (opts.numRetries === 0) throw new OverpassGatewayTimeoutError();
+        // print out response size if verbose
+        if (opts.verbose && resp.headers.has("content-length"))
+          utils.consoleMsg(
+            `response payload ${utils.humanReadableBytes(
+              parseInt(resp.headers.get("content-length") as string)
+            )}`
+          );
 
-        return utils
-          .sleep(opts.retryPause)
-          .then(() => overpass(query, utils.oneLessRetry(opts)));
-      } else {
-        throw new OverpassError(`${resp.status} ${resp.statusText}`);
+        return resp;
       }
-    }
+    );
 
-    // print out response size if verbose
-    if (opts.verbose && resp.headers.has("content-length"))
-      utils.consoleMsg(
-        `response payload ${utils.humanReadableBytes(
-          parseInt(resp.headers.get("content-length") as string)
-        )}`
-      );
-
-    return resp;
-  });
+    return apiResponse;
+  } catch (error) {
+    // if the error isn't thrown by overpass-ts it's a fetch error
+    if (!(error instanceof OverpassError))
+      throw new OverpassConnectionError(error);
+    else throw error;
+  }
 }
 
 export function overpassJson(
@@ -190,6 +203,15 @@ export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
 export class OverpassError extends Error {
   constructor(message: string) {
     super(`Overpass Error: ${message}`);
+  }
+}
+
+export class OverpassConnectionError extends OverpassError {
+  error: any;
+
+  constructor(error: any) {
+    super(error.message);
+    this.error = error;
   }
 }
 
