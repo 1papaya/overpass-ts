@@ -15,7 +15,11 @@
     "build:types": "cd src && tsc -d --emitDeclarationOnly --declarationDir ../dist/",
     "build": "npm run clean && npm run build:src && npm run build:types",
     "download-examples": "node test/download-examples.js",
-    "test": "mocha --timeout 360000 test/test-*.ts"
+    "test": "mocha --timeout 360000 test/test-*.ts",
+    "test:errors": "mocha --timeout 360000 test/test-errors.ts",
+    "test:good": "mocha --timeout 360000 test/test-good.ts",
+    "test:status": "mocha --timeout 360000 test/test-status.ts",
+    "test:types": "mocha --timeout 360000 test/test-types.ts"
   },
   "author": "1papaya",
   "license": "MIT",
