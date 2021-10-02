@@ -200,8 +200,22 @@ export class OverpassRateLimitError extends OverpassError {
 }
 
 export class OverpassBadRequestError extends OverpassError {
+  errors: string[];
+  query: string;
+
   constructor(query: string, errors: string[]) {
-    super(`400 Bad Request\nErrors: ${errors.join("\n")}\nQuery: ${query}`);
+    super(
+      [
+        "400 Bad Request\n",
+        "Errors:\n  ",
+        errors.join("\n  "),
+        "\n",
+        "Query:\n  ",
+        query.replace(/\n/g, "\n  "),
+      ].join("")
+    );
+    this.errors = errors;
+    this.query = query;
   }
 }
 
