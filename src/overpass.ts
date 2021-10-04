@@ -117,7 +117,7 @@ export function overpassJson(
       // a "remark" in the output means an error occurred after
       // the HTTP status code has already been sent
 
-      if (json.remark) throw new OverpassError(json.remark);
+      if (json.remark) throw new OverpassRuntimeError([json.remark]);
       else return json as OverpassJson;
     });
 }
@@ -133,7 +133,7 @@ export function overpassXml(
       // a "remark" in the output means an error occurred after
       // the HTTP status code has already been sent
 
-      // </remark> will always be at end of output, at same position
+      // </remark> will always be at end of output, at same position  
       if (text.slice(-18, -9) === "</remark>") {
         const textLines = text.split("\n");
         const errors = [];
@@ -147,7 +147,7 @@ export function overpassXml(
           else break;
         }
 
-        throw new OverpassError(errors.join(", "));
+        throw new OverpassRuntimeError(errors);
       } else return text as string;
     });
 }
@@ -216,6 +216,15 @@ export class OverpassBadRequestError extends OverpassError {
     );
     this.errors = errors;
     this.query = query;
+  }
+}
+
+export class OverpassRuntimeError extends OverpassError {
+  errors: string[];
+
+  constructor(errors: string[]) {
+    super(errors.join("\n  "));
+    this.errors = errors;
   }
 }
 
