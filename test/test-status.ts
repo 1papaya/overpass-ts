@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { jsonFromFile } from "./common";
+import { jsonFromFile, debug } from "./common";
 import { parseApiStatus } from "../src/utils";
 import { apiStatus, OverpassApiStatusError } from "../src/overpass";
 import { OverpassApiStatus } from "../src/types";
@@ -23,21 +23,21 @@ describe("Overpass API Status", function () {
 
   it("Works correctly on live data", function () {
     return apiStatus(kumiEndpoint).then((apiStatus) => {
-      console.log(apiStatus);
+      debug(apiStatus);
     });
   });
 
   it("Broken switzerland /status endpoint errors correctly", function () {
     return apiStatus(switzerlandEndpoint).catch((error) => {
       assert(error instanceof OverpassApiStatusError);
-      console.log(error.message);
+      debug(error.message);
     });
   });
 
   it("Broken france /status endpoint errors correctly", function () {
     return apiStatus(franceEndpoint).catch((error) => {
       assert(error instanceof OverpassApiStatusError);
-      console.log(error.message);
+      debug(error.message);
     });
   });
 });

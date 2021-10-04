@@ -1,20 +1,39 @@
+import * as assert from "assert";
 import { kumi as kumiEndpoint } from "../src/endpoints";
 import {
+  OverpassBadRequestError,
+  OverpassConnectionError,
   overpassJson,
 } from "../src/overpass";
+
+import { debug } from "./common";
 
 describe("Error API Queries", function () {
   it("400 bad request", function () {
     return overpassJson(`[out:json]; this aint gonna work`, {
       endpoint: kumiEndpoint,
-      verbose: true,
-    }).catch((error) => console.log(error.message));
+      verbose: !!debug.enabled
+    }).then(
+      () => {
+        assert(false);
+      },
+      (error) => {
+        debug(error);
+        assert(error instanceof OverpassBadRequestError);
+      }
+    );
   });
 
   it("bad url", function () {
     return overpassJson(`[out:json]; this aint gonna work`, {
-      verbose: true,
       endpoint: "//aint-gonna-work",
-    }).catch((error) => console.log(error.message));
+      verbose: !!debug.enabled
+    }).then(
+      () => assert(false),
+      (error) => {  
+        debug(error);
+        assert(error instanceof OverpassConnectionError);
+      }
+    );
   });
 });
