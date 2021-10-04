@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { kumi as kumiEndpoint } from "../src/endpoints";
 import {
   OverpassBadRequestError,
-  OverpassConnectionError,
+  OverpassError,
   overpassJson,
 } from "../src/overpass";
 
@@ -32,7 +32,7 @@ describe("Error API Queries", function () {
       () => assert(false),
       (error) => {  
         debug(error);
-        assert(error instanceof OverpassConnectionError);
+        assert(!(error instanceof OverpassError));
       }
     );
   });
