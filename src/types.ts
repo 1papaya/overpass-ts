@@ -4,13 +4,17 @@ export interface OverpassOptions {
    */
   endpoint: string;
   /**
-   * How many retries when rate limit/gateway timeout before giving up?
+   * How many retries when gateway timeout before giving up?
    */
   numRetries: number;
   /**
    * Pause in between receiving a rate limited response and initiating a retry
    */
   retryPause: number;
+  /**
+   * Automatically retry if query is rate limited
+   */
+  rateLimitRetry: boolean;
   /**
    * Output verbose query information
    */
