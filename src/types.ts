@@ -29,16 +29,16 @@ export interface OverpassApiStatus {
   clientId: string;
   currentTime: Date;
   rateLimit: number;
-  slotsAvailableAfter: number[];
-  slotsRunning: string[];
+  slotsLimited: OverpassApiStatusSlotLimited[];
+  slotsRunning: OverpassApiStatusSlotRunning[];
 }
 
-export interface OverpassApiStatusSlotAvailable {
+export interface OverpassApiStatusSlotLimited {
   time: string;
   seconds: number;
 }
 
-export interface OverpassApiStatusSlotsRunning {
+export interface OverpassApiStatusSlotRunning {
   pid: number;
   spaceLimit: number;
   timeLimit: number;
