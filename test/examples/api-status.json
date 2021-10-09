@@ -15,8 +15,17 @@
       "clientId": "1520950174",
       "currentTime": "2021-09-29T11:50:05Z",
       "rateLimit": 2,
-      "slotsAvailableAfter": [422],
-      "slotsRunning": [["20236", "536870912", "180", "2021-09-29T11:49:58Z"]]
+      "slotsAvailableAfter": [
+        { "time": "2021-09-29T11:57:07Z", "seconds": 422 }
+      ],
+      "slotsRunning": [
+        {
+          "pid": 20236,
+          "spaceLimit": 536870912,
+          "timeLimit": 180,
+          "startTime": "2021-09-29T11:49:58Z"
+        }
+      ]
     }
   },
   {
@@ -25,7 +34,10 @@
       "clientId": "1520950174",
       "currentTime": "2021-09-29T11:50:47Z",
       "rateLimit": 2,
-      "slotsAvailableAfter": [380, 438],
+      "slotsAvailableAfter": [
+        { "time": "2021-09-29T11:57:07Z", "seconds": 380 },
+        { "time": "2021-09-29T11:58:05Z", "seconds": 438 }
+      ],
       "slotsRunning": []
     }
   },
@@ -36,7 +48,14 @@
       "currentTime": "2021-09-29T11:52:46Z",
       "rateLimit": 2,
       "slotsAvailableAfter": [],
-      "slotsRunning": [["26880", "536870912", "180", "2021-09-29T11:52:45Z"]]
+      "slotsRunning": [
+        {
+          "pid": 26880,
+          "spaceLimit": 536870912,
+          "timeLimit": 180,
+          "startTime": "2021-09-29T11:52:45Z"
+        }
+      ]
     }
   },
   {
@@ -47,8 +66,19 @@
       "rateLimit": 2,
       "slotsAvailableAfter": [],
       "slotsRunning": [
-        ["26880", "536870912", "180", "2021-09-29T11:52:45Z"],
-        ["28627", "536870912", "180", "2021-09-29T11:53:00Z"]
+        {
+          "pid": 26880,
+          "spaceLimit": 536870912,
+          "timeLimit": 180,
+          "startTime": "2021-09-29T11:52:45Z"
+        },
+
+        {
+          "pid": 28627,
+          "spaceLimit": 536870912,
+          "timeLimit": 180,
+          "startTime": "2021-09-29T11:53:00Z"
+        }
       ]
     }
   }

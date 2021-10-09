@@ -33,6 +33,18 @@ export interface OverpassApiStatus {
   slotsRunning: string[];
 }
 
+export interface OverpassApiStatusSlotAvailable {
+  time: string;
+  seconds: number;
+}
+
+export interface OverpassApiStatusSlotsRunning {
+  pid: number;
+  spaceLimit: number;
+  timeLimit: number;
+  startTime: string;
+}
+
 //
 // Overpass API Response types
 //

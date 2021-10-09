@@ -44,7 +44,10 @@ export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
       status["rateLimit"] = parseInt(statusLine.slice(12));
     else if (lineFirstWord == "Slot")
       status["slotsAvailableAfter"].push(
-        parseInt(statusLine.slice(47).split(" ")[0])
+        [statusLine.slice(22).split(", ")].map((splitLine) => ({
+          time: splitLine[0],
+          seconds: parseInt(splitLine[1].split(" ")[1]),
+        }))[0]
       );
     // any lines not "Currently running queries" or "# slots available now"
     // or empty, count those as slots running lines
@@ -53,7 +56,14 @@ export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
       !statusLine.includes("available") &&
       statusLine !== ""
     )
-      status["slotsRunning"].push(statusLine.split("\t"));
+      status["slotsRunning"].push(
+        [statusLine.split("\t")].map((splitLine) => ({
+          pid: parseInt(splitLine[0]),
+          spaceLimit: parseInt(splitLine[1]),
+          timeLimit: parseInt(splitLine[2]),
+          startTime: splitLine[3],
+        }))[0]
+      );
   });
 
   return status;
