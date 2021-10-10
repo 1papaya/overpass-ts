@@ -1,30 +1,3 @@
-export interface OverpassOptions {
-  /**
-   * Overpass API endpoint URL (usually ends in /interpreter)
-   */
-  endpoint: string;
-  /**
-   * How many retries when gateway timeout before giving up?
-   */
-  numRetries: number;
-  /**
-   * Pause in between receiving a rate limited response and initiating a retry
-   */
-  retryPause: number;
-  /**
-   * Automatically retry if query is rate limited
-   */
-  rateLimitRetry: boolean;
-  /**
-   * Output verbose query information
-   */
-  verbose: boolean;
-  /**
-   * User-agent to send on Overpass Request
-   */
-  userAgent: string;
-}
-
 //
 // Overpass API Response types
 //

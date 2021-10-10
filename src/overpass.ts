@@ -1,4 +1,4 @@
-import type { OverpassJson, OverpassOptions } from "./types";
+import type { OverpassJson } from "./types";
 import type { OverpassApiStatus } from "./status";
 import type { Readable } from "stream";
 
@@ -9,6 +9,33 @@ import * as utils from "./utils";
 import "isomorphic-fetch";
 
 export * from "./types";
+
+export interface OverpassOptions {
+  /**
+   * Overpass API endpoint URL (usually ends in /interpreter)
+   */
+  endpoint: string;
+  /**
+   * How many retries when gateway timeout before giving up?
+   */
+  numRetries: number;
+  /**
+   * Pause in between receiving a rate limited response and initiating a retry
+   */
+  retryPause: number;
+  /**
+   * Automatically retry if query is rate limited
+   */
+  rateLimitRetry: boolean;
+  /**
+   * Output verbose query information
+   */
+  verbose: boolean;
+  /**
+   * User-agent to send on Overpass Request
+   */
+  userAgent: string;
+}
 
 const defaultOpts: OverpassOptions = {
   endpoint: mainEndpoint,
@@ -83,7 +110,6 @@ export async function overpass(
               apiStatus.rateLimit == 0
             )
               return overpass(query, opts);
-              
             // if all slots are running, keep pinging the api status
             else if (apiStatus.slotsRunning.length == apiStatus.rateLimit) {
               return utils

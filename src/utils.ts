@@ -1,4 +1,4 @@
-import { OverpassOptions } from "./types";
+import { OverpassOptions } from "./overpass";
 import { OverpassApiStatus } from "./status";
 
 export const humanReadableBytes = (bytes: number) => {
