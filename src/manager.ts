@@ -47,6 +47,7 @@ export interface ManagedOptions {
   retryPause: number;
   verbose: boolean;
   rateLimitRetry: boolean;
+  apiStatusCallback: Function;
 }
 
 const defaultManagedOptions = {
@@ -54,6 +55,7 @@ const defaultManagedOptions = {
   retryPause: 2000,
   verbose: true,
   rateLimitRetry: true,
+  apiStatusCallback: (apiStatus: OverpassApiStatus) => {},
 };
 
 export const managedRequest = (
@@ -101,6 +103,8 @@ export const managedRequest = (
             const handleRateLimited = (): any =>
               apiStatus(opts.overpass.endpoint).then(
                 (apiStatus: OverpassApiStatus) => {
+                  opts.managed.apiStatusCallback(apiStatus);
+
                   // if there are more slots available than being used
                   // or rate limit is 0 (unlimited), resend request immediately
                   if (
