@@ -74,80 +74,25 @@ export async function overpass(
   } as RequestInit;
 
   return fetch(opts.endpoint, fetchOpts).then(async (resp) => {
-    // handle non-200 errors
+    // throw error on non-200
     if (!resp.ok) {
-      if (resp.status === 400) {
-        // 400 bad request
+      switch (resp.status) {
+        case 400:
+          // 400 bad request
+          // if bad request, error details sent along as html
+          // load the html and parse it for detailed error
+          const errors = matchAll(
+            /<\/strong>: ([^<]+) <\/p>/g,
+            await resp.text()
+          ).map((error) => error.replace(/&quot;/g, '"'));
 
-        // if bad request, error details sent along as html
-        // load the html and parse it for detailed error
-
-        const errors = matchAll(
-          /<\/strong>: ([^<]+) <\/p>/g,
-          await resp.text()
-        ).map((error) => error.replace(/&quot;/g, '"'));
-
-        throw new OverpassBadRequestError(query, errors);
-      } else if (resp.status === 429) {
-        // 429 too many requests / rate limited
-
-        const handleRateLimited = (): Promise<Response> =>
-          apiStatus(opts.endpoint).then((apiStatus: OverpassApiStatus) => {
-            if (opts.verbose)
-              consoleMsg(
-                [
-                  "apiStatus",
-                  ["rate limit", apiStatus.rateLimit],
-                  ["slots limited", apiStatus.slotsLimited.length],
-                  ["slots running", apiStatus.slotsRunning.length],
-                ]
-                  .flat()
-                  .join(" ")
-              );
-
-            if (opts.rateLimitRetry)
-              throw new OverpassRateLimitError(apiStatus);
-
-            // if there are more slots available than being used
-            // or rate limit is 0 (unlimited), resend request immediately
-            if (
-              apiStatus.rateLimit >
-                apiStatus.slotsLimited.length + apiStatus.slotsRunning.length ||
-              apiStatus.rateLimit == 0
-            )
-              return overpass(query, opts);
-            // if all slots are running, keep pinging the api status
-            else if (apiStatus.slotsRunning.length == apiStatus.rateLimit) {
-              return sleep(opts.retryPause).then(() => handleRateLimited());
-            }
-
-            // if all slots are rate limited, pause until first rate limit over
-            else {
-              const lowestWaitTime =
-                Math.min(
-                  ...apiStatus.slotsLimited.map((slot) => slot.seconds)
-                ) + 1;
-
-              if (opts.verbose)
-                consoleMsg(`waiting ${lowestWaitTime}s for rate limit end`);
-
-              return sleep(lowestWaitTime * 1000).then(() =>
-                overpass(query, opts)
-              );
-            }
-          });
-
-        return handleRateLimited();
-      } else if (resp.status === 504) {
-        // 504 gateway timeout
-
-        if (opts.numRetries === 0) throw new OverpassGatewayTimeoutError();
-
-        return sleep(opts.retryPause).then(() =>
-          overpass(query, oneLessRetry(opts))
-        );
-      } else {
-        throw new OverpassError(`${resp.status} ${resp.statusText}`);
+          throw new OverpassBadRequestError(query, errors);
+        case 429:
+          throw new OverpassRateLimitError();
+        case 504:
+          throw new OverpassGatewayTimeoutError();
+        default:
+          throw new OverpassError(`${resp.status} ${resp.statusText}`);
       }
     }
 
