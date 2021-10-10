@@ -1,4 +1,4 @@
-import type { OverpassJson } from "../src/overpass";
+import type { OverpassJson } from "../src/types";
 import { kumi as kumiEndpoint } from "../src/endpoints";
 import * as nodeStream from "stream";
 import * as assert from "assert";
