@@ -3,14 +3,11 @@ import type { OverpassJson } from "./types";
 import type { Readable } from "stream";
 
 import { main as mainEndpoint } from "./endpoints";
-import { apiStatus } from "./status";
 import {
   humanReadableBytes,
   OverpassError,
-  oneLessRetry,
   consoleMsg,
   matchAll,
-  sleep,
 } from "./common";
 
 import "isomorphic-fetch";
@@ -20,18 +17,6 @@ export interface OverpassOptions {
    * Overpass API endpoint URL (usually ends in /interpreter)
    */
   endpoint: string;
-  /**
-   * How many retries when gateway timeout before giving up?
-   */
-  numRetries: number;
-  /**
-   * Pause in between receiving a rate limited response and initiating a retry
-   */
-  retryPause: number;
-  /**
-   * Automatically retry if query is rate limited
-   */
-  rateLimitRetry: boolean;
   /**
    * Output verbose query information
    */
@@ -44,9 +29,6 @@ export interface OverpassOptions {
 
 const defaultOpts: OverpassOptions = {
   endpoint: mainEndpoint,
-  numRetries: 1,
-  retryPause: 2000,
-  rateLimitRetry: true,
   verbose: false,
   userAgent: "overpass-ts",
 };

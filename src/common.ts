@@ -24,10 +24,10 @@ export const consoleMsg = (msg: string) => {
   console.log(`Overpass: ${msg}`);
 };
 
-export const oneLessRetry = (opts: OverpassOptions) =>
-  Object.assign({}, opts, {
-    numRetries: opts.numRetries - 1,
-  });
+// export const oneLessRetry = (opts: OverpassOptions) =>
+//   Object.assign({}, opts, {
+//     numRetries: opts.numRetries - 1,
+//   });
 
 export class OverpassError extends Error {
   constructor(message: string) {
