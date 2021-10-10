@@ -1,4 +1,5 @@
-import { OverpassApiStatus, OverpassOptions } from "./types";
+import { OverpassOptions } from "./types";
+import { OverpassApiStatus } from "./status";
 
 export const humanReadableBytes = (bytes: number) => {
   return bytes > 1024 * 1024

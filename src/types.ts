@@ -25,26 +25,6 @@ export interface OverpassOptions {
   userAgent: string;
 }
 
-export interface OverpassApiStatus {
-  clientId: string;
-  currentTime: Date;
-  rateLimit: number;
-  slotsLimited: OverpassApiStatusSlotLimited[];
-  slotsRunning: OverpassApiStatusSlotRunning[];
-}
-
-export interface OverpassApiStatusSlotLimited {
-  time: string;
-  seconds: number;
-}
-
-export interface OverpassApiStatusSlotRunning {
-  pid: number;
-  spaceLimit: number;
-  timeLimit: number;
-  startTime: string;
-}
-
 //
 // Overpass API Response types
 //
