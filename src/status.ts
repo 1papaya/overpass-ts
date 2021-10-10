@@ -1,7 +1,20 @@
-import { OverpassError } from "./common";
+import { consoleMsg, OverpassError } from "./common";
 
-export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
-  fetch(endpoint.replace("/interpreter", "/status"))
+export interface ApiStatusOptions {
+  verbose: boolean;
+}
+
+export const defaultApiStatusOptions: ApiStatusOptions = {
+  verbose: false,
+};
+
+export const apiStatus = (
+  endpoint: string,
+  apiStatusOpt: Partial<ApiStatusOptions> = {}
+): Promise<OverpassApiStatus> => {
+  const opts = Object.assign({}, defaultApiStatusOptions, apiStatusOpt);
+
+  return fetch(endpoint.replace("/interpreter", "/status"))
     .then((resp) => {
       const responseType = resp.headers.get("content-type");
 
@@ -18,9 +31,21 @@ export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
       if (!("clientId" in apiStatus))
         throw new OverpassApiStatusError(`Unable to parse API Status`);
 
+      if (opts.verbose)
+        consoleMsg(
+          [
+            "apiStatus",
+            ["rate limit", apiStatus.rateLimit],
+            ["slots limited", apiStatus.slotsLimited.length],
+            ["slots running", apiStatus.slotsRunning.length],
+          ]
+            .flat()
+            .join(" ")
+        );
+
       return apiStatus;
     });
-
+};
 export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
   const status: any = {
     slotsRunning: [],
