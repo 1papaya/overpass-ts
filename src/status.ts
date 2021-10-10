@@ -1,4 +1,4 @@
-import { parseApiStatus, OverpassError } from "./common";
+import { OverpassError } from "./common";
 
 export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
   fetch(endpoint.replace("/interpreter", "/status"))
@@ -20,6 +20,46 @@ export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
 
       return apiStatus;
     });
+
+export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
+  const status: any = {
+    slotsRunning: [],
+    slotsAvailableAfter: [],
+  };
+
+  statusHtml.split("\n").forEach((statusLine) => {
+    const lineFirstWord = statusLine.split(" ")[0];
+    if (lineFirstWord == "Connected") status["clientId"] = statusLine.slice(14);
+    else if (lineFirstWord == "Current")
+      status["currentTime"] = statusLine.slice(14);
+    else if (lineFirstWord == "Rate")
+      status["rateLimit"] = parseInt(statusLine.slice(12));
+    else if (lineFirstWord == "Slot")
+      status["slotsAvailableAfter"].push(
+        [statusLine.slice(22).split(", ")].map((splitLine) => ({
+          time: splitLine[0],
+          seconds: parseInt(splitLine[1].split(" ")[1]),
+        }))[0]
+      );
+    // any lines not "Currently running queries" or "# slots available now"
+    // or empty, count those as slots running lines
+    else if (
+      lineFirstWord != "Currently" &&
+      !statusLine.includes("available") &&
+      statusLine !== ""
+    )
+      status["slotsRunning"].push(
+        [statusLine.split("\t")].map((splitLine) => ({
+          pid: parseInt(splitLine[0]),
+          spaceLimit: parseInt(splitLine[1]),
+          timeLimit: parseInt(splitLine[2]),
+          startTime: splitLine[3],
+        }))[0]
+      );
+  });
+
+  return status;
+};
 
 export interface OverpassApiStatus {
   clientId: string;
