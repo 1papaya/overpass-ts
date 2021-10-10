@@ -1,5 +1,3 @@
-import { OverpassOptions } from "./overpass";
-
 export const humanReadableBytes = (bytes: number) => {
   return bytes > 1024 * 1024
     ? `${Math.round((bytes / (1024 * 1024)) * 100) / 100}MiB`
