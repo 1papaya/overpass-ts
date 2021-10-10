@@ -4,7 +4,7 @@ import type { Readable } from "stream";
 
 import { main as mainEndpoint } from "./endpoints";
 import { apiStatus } from "./status";
-import * as utils from "./utils";
+import * as utils from "./common";
 
 import "isomorphic-fetch";
 

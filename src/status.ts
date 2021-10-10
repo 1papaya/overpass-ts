@@ -1,4 +1,4 @@
-import { parseApiStatus } from "./utils";
+import { parseApiStatus } from "./common";
 import { OverpassError } from "./overpass";
 
 export const apiStatus = (endpoint: string): Promise<OverpassApiStatus> =>
