@@ -27,7 +27,7 @@ export interface OverpassOptions {
   userAgent: string;
 }
 
-const defaultOpts: OverpassOptions = {
+export const defaultOverpassOptions: OverpassOptions = {
   endpoint: mainEndpoint,
   verbose: false,
   userAgent: "overpass-ts",
@@ -37,7 +37,7 @@ export async function overpass(
   query: string,
   overpassOpts: Partial<OverpassOptions> = {}
 ): Promise<Response> {
-  const opts = Object.assign({}, defaultOpts, overpassOpts);
+  const opts = Object.assign({}, defaultOverpassOptions, overpassOpts);
 
   if (opts.verbose) {
     consoleMsg(`endpoint ${opts.endpoint}`);

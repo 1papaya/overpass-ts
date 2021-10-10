@@ -32,3 +32,7 @@ export class OverpassError extends Error {
     super(`Overpass Error: ${message}`);
   }
 }
+
+export const endpointName = (endpoint: string): string => {
+  return new URL(endpoint).hostname;
+};

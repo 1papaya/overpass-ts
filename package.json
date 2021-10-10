@@ -21,7 +21,8 @@
   "author": "1papaya",
   "license": "MIT",
   "dependencies": {
-    "isomorphic-fetch": "^3.0.0"
+    "isomorphic-fetch": "^3.0.0",
+    "p-limit": "^4.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^18.0.0",

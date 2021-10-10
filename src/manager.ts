@@ -1,4 +1,7 @@
 import { main as mainEndpoint } from "./endpoints";
+import { OverpassJson } from "./types";
+import { overpass, defaultOverpassOptions, OverpassOptions } from "./overpass";
+import type { Readable } from "stream";
 import {
   overpassJson,
   overpassXml,
@@ -10,105 +13,140 @@ import {
 } from "./overpass";
 
 import { apiStatus, OverpassApiStatus } from "./status";
-import { sleep, consoleMsg, OverpassError } from "./common";
+import { sleep, consoleMsg, OverpassError, endpointName } from "./common";
 
 export interface OverpassManagerOptions {
   endpoint: string | string[];
   verbose: boolean;
   numRetries: number;
   retryPause: number;
-}
-
-export interface OverpassRequest {
-  endpoint: string;
-  query: string;
-  overpassFn: typeof overpassJson | typeof overpassXml | typeof overpassStream;
+  maxSlots: number;
 }
 
 const defaultOverpassManagerOptions = {
   endpoint: mainEndpoint,
+  maxSlots: 4,
   numRetries: 1,
   retryPause: 2000,
   verbose: false,
 };
 
+export interface OverpassRequest {
+  endpoint: string;
+  query: string;
+  overpassFn: OverpassFunction;
+}
+
+export type OverpassFunction =
+  | typeof overpassJson
+  | typeof overpassXml
+  | typeof overpassStream;
+
+export interface ManagedOptions {
+  numRetries: number;
+  retryPause: number;
+  verbose: boolean;
+}
+
+const defaultManagedOptions = {
+  numRetrues: 4,
+  retryPause: 2000,
+  verbose: true,
+};
+
+export const managedRequest = (
+  query: string,
+  overpassOpts: Partial<OverpassOptions> = {},
+  managedOpts: Partial<ManagedOptions> = {}
+): Promise<Response> => {
+  const opts = {
+    overpass: Object.assign({}, defaultOverpassOptions, overpassOpts),
+    managed: Object.assign({}, defaultManagedOptions, managedOpts),
+  };
+
+  return overpass(query, overpassOpts).catch((error: any) => {
+    if (error instanceof OverpassError) {
+      switch (error.constructor) {
+        // if error is bad request/runtime error
+        // just rethrow. not much we can do about it
+        case OverpassBadRequestError:
+        case OverpassRuntimeError:
+          throw error;
+
+        // if gateway timeout just sleep
+        case OverpassGatewayTimeoutError:
+          if (managedOpts.verbose)
+            consoleMsg(
+              [
+                "gateway timeout",
+                endpointName(opts.overpass.endpoint),
+                `pausing ${Math.round(opts.managed.retryPause / 1000)}s`,
+              ].join(" ")
+            );
+
+          return sleep(opts.managed.retryPause).then(() =>
+            managedRequest(query, overpassOpts, managedOpts)
+          );
+
+        // if rate limited....complex logic
+        case OverpassRateLimitError:
+          if (opts.managed.verbose)
+            consoleMsg(
+              ["rate limited", endpointName(opts.overpass.endpoint)].join(" ")
+            );
+
+        //return null;//handleRateLimited(query, overpassOpts, managedOpts);
+
+        // if error is of unknown type just rethrow
+        default:
+          throw error;
+      }
+    }
+    // if error isn't an overpass
+    else throw error;
+  });
+};
+
 export class OverpassManager {
   opts: OverpassManagerOptions = defaultOverpassManagerOptions;
-  endpoints: string[] = [];
-  queue: { [endpoint: string]: Function } = {};
-  status: { [endpoint: string]: OverpassApiStatus } = {};
+  endpoints: {
+    [endpoint: string]: {
+      queue: Function[];
+      status: OverpassApiStatus | null;
+    };
+  } = {};
 
   constructor(opts: Partial<OverpassManagerOptions>) {
     this.opts = Object.assign({}, defaultOverpassManagerOptions, opts);
-    this.endpoints = [this.opts.endpoint].flat();
-    this.status = Object.assign(
+    this.endpoints = Object.assign(
       {},
-      ...this.endpoints.map((endpoint) => ({ [endpoint]: {} }))
-    );
-    this.queue = Object.assign(
-      {},
-      ...this.endpoints.map((endpoint) => ({ [endpoint]: {} }))
+      ...[this.opts.endpoint].flat().map((endpoint) => ({
+        queue: [],
+        status: null,
+      }))
     );
   }
 
-  execute(query: string, response: "xml" | "stream" | "json" = "json") {
+  execute(query: string, overpassFn: OverpassFunction) {
     const request: OverpassRequest = {
       endpoint: this._getBestEndpoint(),
       query: query,
-      overpassFn:
-        response == "xml"
-          ? overpassXml
-          : response == "stream"
-          ? overpassStream
-          : overpassJson,
+      overpassFn: overpassFn,
     };
 
-    this.queue.push(() =>
-      this._request(request).catch((error: any) => {
-        if (error instanceof OverpassError) {
-          switch (error.constructor) {
-            // if error is bad request/runtime error
-            // just rethrow. not much we can do about it
-            case OverpassBadRequestError:
-            case OverpassRuntimeError:
-              throw error;
+    return this._request(request);
+  }
 
-            // if gateway timeout just sleep
-            case OverpassGatewayTimeoutError:
-              if (this.opts.verbose)
-                consoleMsg(
-                  [
-                    "gateway timeout",
-                    this._endpointName(request.endpoint),
-                    `pausing ${Math.round(this.opts.retryPause / 1000)}s`,
-                  ].join(" ")
-                );
+  executeJson(query: string): Promise<OverpassJson> {
+    return this.execute(query, overpassJson);
+  }
 
-              return sleep(this.opts.retryPause).then(() =>
-                this._request(request)
-              );
+  executeXml(query: string): Promise<string> {
+    return this.execute(query, overpassXml);
+  }
 
-            // if rate limited....complex logic
-            case OverpassRateLimitError:
-              if (this.opts.verbose)
-              consoleMsg(
-                [
-                  "rate limited",
-                  this._endpointName(request.endpoint),
-                ].join(" ")
-              );
-
-              return this._handleRateLimited(request);
-
-            // if error is of unknown type just rethrow
-            default:
-              throw error;
-          }
-        }
-        // if error isn't an overpass
-        else throw error;
-      })
-    );
+  executeStream(query: string): Promise<Readable | ReadableStream | null> {
+    return this.execute(query, overpassXml);
   }
 
   _endpointName(endpoint: string): string {
@@ -129,50 +167,37 @@ export class OverpassManager {
   }
 
   _getBestEndpoint(): string {
-    if (this.endpoints.length == 1) return this.endpoints[0];
-    else return this.endpoints[0];
-    // TODO complex logic to check endpoint statuses etc
-  }
+    const endpoints = Object.entries(this.endpoints);
 
-  _handleRateLimited(request: OverpassRequest): Promise<Response> {
-    return apiStatus(request.endpoint).then((apiStatus: OverpassApiStatus) => {
-      if (this.opts.verbose)
-        consoleMsg(
-          [
-            "apiStatus",
-            ["rate limit", apiStatus.rateLimit],
-            ["slots limited", apiStatus.slotsLimited.length],
-            ["slots running", apiStatus.slotsRunning.length],
-          ]
-            .flat()
-            .join(" ")
-        );
+    let bestEndpoint = endpoints[0][0];
 
-      // if there are more slots available than being used
-      // or rate limit is 0 (unlimited), resend request immediately
-      if (
-        apiStatus.rateLimit >
-          apiStatus.slotsLimited.length + apiStatus.slotsRunning.length ||
-        apiStatus.rateLimit == 0
-      )
-        return this._request(request);
-      // if all slots are running, keep pinging the api status
-      else if (apiStatus.slotsRunning.length == apiStatus.rateLimit) {
-        return sleep(this.opts.retryPause).then(() =>
-          this._handleRateLimited(request)
-        );
+    let unused: string[] = []; // endpoints that haven't
+    let rateLimited: string[] = [];
+    let slotsRunning: string[] = [];
+    let slotsAvailable: string[] = [];
+
+    // if only using one endpoint return that
+    if (endpoints.length == 1) bestEndpoint = endpoints[0][0];
+    else
+      for (let [endpoint, { queue, status }] of endpoints) {
+        // highest priority if endpoint is unused
+        if (status == null) return endpoint;
+        else {
+          // if slots are available, use that
+          // TODO implement plimit is at the max slots
+          if (
+            status.rateLimit >
+              status.slotsLimited.length + slotsRunning.length ||
+            (status.rateLimit == 0 && 0 < this.opts.maxSlots)
+          )
+            return endpoint;
+          else if (true) {
+          }
+
+          // else find the endpoint with the rate limit that will expire the soonest
+        }
       }
 
-      // if all slots are rate limited, pause until first rate limit over
-      else {
-        const lowestWaitTime =
-          Math.min(...apiStatus.slotsLimited.map((slot) => slot.seconds)) + 1;
-
-        if (this.opts.verbose)
-          consoleMsg(`waiting ${lowestWaitTime}s for rate limit end`);
-
-        return sleep(lowestWaitTime * 1000).then(() => this._request(request));
-      }
-    });
+    return bestEndpoint;
   }
 }
