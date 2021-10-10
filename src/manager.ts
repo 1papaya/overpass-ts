@@ -46,12 +46,14 @@ export interface ManagedOptions {
   numRetries: number;
   retryPause: number;
   verbose: boolean;
+  rateLimitRetry: boolean;
 }
 
 const defaultManagedOptions = {
   numRetrues: 4,
   retryPause: 2000,
   verbose: true,
+  rateLimitRetry: true,
 };
 
 export const managedRequest = (
@@ -95,7 +97,48 @@ export const managedRequest = (
               ["rate limited", endpointName(opts.overpass.endpoint)].join(" ")
             );
 
-        //return null;//handleRateLimited(query, overpassOpts, managedOpts);
+          if (opts.managed.rateLimitRetry) {
+            const handleRateLimited = (): any =>
+              apiStatus(opts.overpass.endpoint).then(
+                (apiStatus: OverpassApiStatus) => {
+                  // if there are more slots available than being used
+                  // or rate limit is 0 (unlimited), resend request immediately
+                  if (
+                    apiStatus.rateLimit >
+                      apiStatus.slotsLimited.length +
+                        apiStatus.slotsRunning.length ||
+                    apiStatus.rateLimit == 0
+                  )
+                    return managedRequest(query, overpassOpts, managedOpts);
+                  // if all slots are running, keep pinging the api status
+                  else if (
+                    apiStatus.slotsRunning.length == apiStatus.rateLimit
+                  ) {
+                    return sleep(opts.managed.retryPause).then(() =>
+                      handleRateLimited()
+                    );
+                  }
+
+                  // if all slots are rate limited, pause until first rate limit over
+                  else {
+                    const lowestWaitTime =
+                      Math.min(
+                        ...apiStatus.slotsLimited.map((slot) => slot.seconds)
+                      ) + 1;
+
+                    if (opts.managed.verbose)
+                      consoleMsg(
+                        `waiting ${lowestWaitTime}s for rate limit end`
+                      );
+
+                    return sleep(lowestWaitTime * 1000).then(() =>
+                      managedRequest(query, overpassOpts, managedOpts)
+                    );
+                  }
+                }
+              );
+            return handleRateLimited();
+          } else throw new OverpassRateLimitError();
 
         // if error is of unknown type just rethrow
         default:
