@@ -69,3 +69,9 @@ export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
 
   return status;
 };
+
+export class OverpassError extends Error {
+  constructor(message: string) {
+    super(`Overpass Error: ${message}`);
+  }
+}

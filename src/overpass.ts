@@ -1,14 +1,19 @@
-import type { OverpassJson } from "./types";
 import type { OverpassApiStatus } from "./status";
+import type { OverpassJson } from "./types";
 import type { Readable } from "stream";
 
 import { main as mainEndpoint } from "./endpoints";
 import { apiStatus } from "./status";
-import * as utils from "./common";
+import {
+  humanReadableBytes,
+  OverpassError,
+  oneLessRetry,
+  consoleMsg,
+  matchAll,
+  sleep,
+} from "./common";
 
 import "isomorphic-fetch";
-
-export * from "./types";
 
 export interface OverpassOptions {
   /**
@@ -53,8 +58,8 @@ export async function overpass(
   const opts = Object.assign({}, defaultOpts, overpassOpts);
 
   if (opts.verbose) {
-    utils.consoleMsg(`endpoint ${opts.endpoint}`);
-    utils.consoleMsg(`query ${query}`);
+    consoleMsg(`endpoint ${opts.endpoint}`);
+    consoleMsg(`query ${query}`);
   }
 
   const fetchOpts = {
@@ -77,9 +82,10 @@ export async function overpass(
         // if bad request, error details sent along as html
         // load the html and parse it for detailed error
 
-        const errors = utils
-          .matchAll(/<\/strong>: ([^<]+) <\/p>/g, await resp.text())
-          .map((error) => error.replace(/&quot;/g, '"'));
+        const errors = matchAll(
+          /<\/strong>: ([^<]+) <\/p>/g,
+          await resp.text()
+        ).map((error) => error.replace(/&quot;/g, '"'));
 
         throw new OverpassBadRequestError(query, errors);
       } else if (resp.status === 429) {
@@ -88,7 +94,7 @@ export async function overpass(
         const handleRateLimited = (): Promise<Response> =>
           apiStatus(opts.endpoint).then((apiStatus: OverpassApiStatus) => {
             if (opts.verbose)
-              utils.consoleMsg(
+              consoleMsg(
                 [
                   "apiStatus",
                   ["rate limit", apiStatus.rateLimit],
@@ -112,9 +118,7 @@ export async function overpass(
               return overpass(query, opts);
             // if all slots are running, keep pinging the api status
             else if (apiStatus.slotsRunning.length == apiStatus.rateLimit) {
-              return utils
-                .sleep(opts.retryPause)
-                .then(() => handleRateLimited());
+              return sleep(opts.retryPause).then(() => handleRateLimited());
             }
 
             // if all slots are rate limited, pause until first rate limit over
@@ -125,13 +129,11 @@ export async function overpass(
                 ) + 1;
 
               if (opts.verbose)
-                utils.consoleMsg(
-                  `waiting ${lowestWaitTime}s for rate limit end`
-                );
+                consoleMsg(`waiting ${lowestWaitTime}s for rate limit end`);
 
-              return utils
-                .sleep(lowestWaitTime * 1000)
-                .then(() => overpass(query, opts));
+              return sleep(lowestWaitTime * 1000).then(() =>
+                overpass(query, opts)
+              );
             }
           });
 
@@ -141,9 +143,9 @@ export async function overpass(
 
         if (opts.numRetries === 0) throw new OverpassGatewayTimeoutError();
 
-        return utils
-          .sleep(opts.retryPause)
-          .then(() => overpass(query, utils.oneLessRetry(opts)));
+        return sleep(opts.retryPause).then(() =>
+          overpass(query, oneLessRetry(opts))
+        );
       } else {
         throw new OverpassError(`${resp.status} ${resp.statusText}`);
       }
@@ -151,8 +153,8 @@ export async function overpass(
 
     // print out response size if verbose
     if (opts.verbose && resp.headers.has("content-length"))
-      utils.consoleMsg(
-        `response payload ${utils.humanReadableBytes(
+      consoleMsg(
+        `response payload ${humanReadableBytes(
           parseInt(resp.headers.get("content-length") as string)
         )}`
       );
@@ -219,20 +221,6 @@ export function overpassStream(
   opts: Partial<OverpassOptions> = {}
 ): Promise<Readable | ReadableStream | null> {
   return overpass(query, opts).then((resp) => resp.body);
-}
-
-// recursive function to handle rate limiting by checking
-// api status and pausing / resending request accordingly
-// export const handleRateLimited = (
-//   query: string,
-//   opts: OverpassOptions,
-//   initialApiStatus: null | OverpassApiStatus = null
-// ): Promise<Response> =>
-
-export class OverpassError extends Error {
-  constructor(message: string) {
-    super(`Overpass Error: ${message}`);
-  }
 }
 
 export class OverpassRateLimitError extends OverpassError {
