@@ -1,3 +1,6 @@
+import { OverpassRuntimeError } from "./overpass";
+import { OverpassJson } from "./types";
+
 export const humanReadableBytes = (bytes: number) => {
   return bytes > 1024 * 1024
     ? `${Math.round((bytes / (1024 * 1024)) * 100) / 100}MiB`
@@ -35,4 +38,36 @@ export class OverpassError extends Error {
 
 export const endpointName = (endpoint: string): string => {
   return new URL(endpoint).hostname;
+};
+
+export const checkRuntimeErrorJson = (json: OverpassJson): OverpassJson => {
+  // https://github.com/drolbr/Overpass-API/issues/94
+  // a "remark" in the output means an error occurred after
+  // the HTTP status code has already been sent
+
+  if (json.remark) throw new OverpassRuntimeError([json.remark]);
+  else return json as OverpassJson;
+};
+
+export const checkRuntimeErrorXml = (text: string): string => {
+  // https://github.com/drolbr/Overpass-API/issues/94
+  // a "remark" in the output means an error occurred after
+  // the HTTP status code has already been sent
+
+  // </remark> will always be at end of output, at same position
+  if (text.slice(-18, -9) === "</remark>") {
+    const textLines = text.split("\n");
+    const errors = [];
+
+    // loop backwards thru text lines skipping first 4 lines
+    // collect each remark (there can be multiple)
+    // break once remark is not matched
+    for (let i = textLines.length - 4; i > 0; i--) {
+      const remark = textLines[i].match(/<remark>\s*(.+)\s*<\/remark>/);
+      if (remark) errors.push(remark[1]);
+      else break;
+    }
+
+    throw new OverpassRuntimeError(errors);
+  } else return text as string;
 };
