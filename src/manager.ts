@@ -8,7 +8,7 @@ import type { QueryOptions } from "./query";
 import type { OverpassOptions } from "./overpass";
 
 export interface OverpassManagerOptions {
-  endpoint: string | string[];
+  endpoints: string | string[];
   verbose: boolean;
   numRetries: number;
   retryPause: number;
@@ -16,7 +16,7 @@ export interface OverpassManagerOptions {
 }
 
 const defaultOverpassManagerOptions = {
-  endpoint: mainEndpoint,
+  endpoints: mainEndpoint,
   maxSlots: 4,
   numRetries: 1,
   retryPause: 2000,
@@ -37,30 +37,46 @@ export class OverpassManager {
 
   constructor(opts: Partial<OverpassManagerOptions>) {
     this.opts = Object.assign({}, defaultOverpassManagerOptions, opts);
-    this.endpoints = Object.assign(
-      {},
-      ...[this.opts.endpoint].flat().map((endpoint) => ({
-        queue: [],
-        status: null,
-      }))
-    );
   }
 
-  query(query: string, opts: Partial<OverpassOptions> | Partial<QueryOptions>) {
+  async _initializeEndpoints() {
+    return Promise.all(
+      [this.opts.endpoints].flat().map((endpoint) =>
+        apiStatus(endpoint, { verbose: this.opts.verbose })
+          .then((status) => ({ endpoint, status }))
+          .catch(() => ({ endpoint, status: null }))
+      )
+    )
+      .then((apiStatuses) =>
+        Object.assign(
+          {},
+          ...apiStatuses.map(({ endpoint, status }) => ({
+            [endpoint]: {
+              queue: [],
+              status,
+            },
+          }))
+        )
+      )
+      .then((initialEndpoints) => {
+        this.endpoints = initialEndpoints;
+        return initialEndpoints;
+      });
+  }
 
-  }
-  _request() {
-  }
+  query(
+    query: string,
+    opts: Partial<OverpassOptions> | Partial<QueryOptions>
+  ) {}
+  _request() {}
 
   _getBestEndpoint(): string {
     const endpoints = Object.entries(this.endpoints);
 
     let bestEndpoint = endpoints[0][0];
 
-    let unused: string[] = []; // endpoints that haven't
     let rateLimited: string[] = [];
     let slotsRunning: string[] = [];
-    let slotsAvailable: string[] = [];
 
     // if only using one endpoint return that
     if (endpoints.length == 1) bestEndpoint = endpoints[0][0];
