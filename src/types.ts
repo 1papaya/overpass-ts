@@ -7,6 +7,7 @@ export interface OverpassJson {
   generator: string;
   osm3s: {
     timestamp_osm_base: string;
+    timestamp_areas_base?: string;
     copyright: string;
   };
   elements: Array<
@@ -24,7 +25,7 @@ export interface OverpassJson {
 //
 
 export interface OverpassElement {
-  type: "node" | "way" | "relation" | "timeline" | "count";
+  type: "node" | "way" | "relation" | "area" | "timeline" | "count";
   id: number;
 }
 
@@ -85,6 +86,15 @@ export interface OverpassRelationMember {
 
   // Relation Way Members in `out geom;` have point geoms
   geometry?: OverpassPointGeom[];
+}
+
+//
+// Area
+//
+
+export interface OverpassArea extends OverpassElement {
+  type: "area";
+  tags: { [key: string]: string };
 }
 
 //
