@@ -1,13 +1,18 @@
 import { apiStatus, OverpassApiStatus } from "./status";
-import { overpass, overpassJson, overpassXml } from "./overpass";
+import {
+  overpass,
+  OverpassGatewayTimeoutError,
+  overpassJson,
+  OverpassRateLimitError,
+  overpassXml,
+} from "./overpass";
 import { main as mainEndpoint } from "./endpoints";
 import { queryOverpass, queryJson, queryXml } from "./query";
 import { OverpassJson } from "./types";
 import type { Readable } from "stream";
 import type { QueryOptions } from "./query";
 import type { OverpassOptions } from "./overpass";
-import PQueue from "../node_modules/p-queue/dist/index";
-import { consoleMsg, OverpassError } from "./common";
+import { consoleMsg, OverpassError, sleep, buildQueryObject } from "./common";
 
 export interface OverpassManagerOptions {
   endpoints: string | string[];
@@ -25,85 +30,73 @@ const defaultOverpassManagerOptions = {
   verbose: false,
 };
 
-// p-queue for each endpoint
+export interface OverpassQuery {
+  name?: string;
+  query: string;
+  options: { [key: string]: string };
+}
 
 export class OverpassManager {
   opts: OverpassManagerOptions = defaultOverpassManagerOptions;
-  queue: [string, Partial<OverpassOptions>][] = [];
+  queue: OverpassQuery[] = [];
+  queueIndex: number = 0;
+  poll: NodeJS.Timeout | null = null;
   endpoints: OverpassEndpoint[] = [];
 
-  constructor(opts: Partial<OverpassManagerOptions>) {
+  constructor(opts: Partial<OverpassManagerOptions> = {}) {
     this.opts = Object.assign({}, defaultOverpassManagerOptions, opts);
+    this.endpoints = [this.opts.endpoints]
+      .flat()
+      .map((endpointUri) => new OverpassEndpoint(endpointUri));
   }
 
-  // Promise.all([
-  //   overpass.query("whatever", {}).then(),
-  //   overpass.query("whatever2", {}).then(),
-  //   overpass.query("whatever43", {}).then(),
-  //   overpass.query("whatever5", {}).then(),
-  // ])
+  async query(query: string | OverpassQuery) {
+    const queryObj = buildQueryObject(query, this.queue);
 
-  async query(
-    query: string,
-    opts: Partial<OverpassOptions> | Partial<QueryOptions>
-  ) {
-    this.queue.push([query, opts]);
+    this.queue.push(queryObj);
+
+    if (!this.poll) this.poll = setInterval(() => this._pollEndpoints(), 500);
   }
-  _request() {}
 
-  _getBestEndpoint(): OverpassEndpoint {
-    const endpoints = this.endpoints;
+  _pollEndpoints() {
+    // TODO make sure this good
 
-    let bestEndpoint = endpoints[0];
+    // check if there are any slots available for
+    if (this.queue.length < this.queueIndex)
+      clearInterval(this.poll as NodeJS.Timeout);
+    else {
+      for (let endpoint of this.endpoints) {
+        const slotsAvailable = endpoint.getSlotsAvailable();
 
-    let rateLimited: string[] = [];
-    let slotsRunning: string[] = [];
-
-    // if only using one endpoint return that
-    if (endpoints.length == 1) bestEndpoint = endpoints[0];
-    else
-      for (let endpoint of endpoints) {
-        // highest priority if endpoint is unused
-        if (endpoint.status == null) return endpoint;
-        else {
-          // if slots are available, use that
-          // TODO implement plimit is at the max slots
-          if (
-            endpoint.status.rateLimit >
-              endpoint.status.slotsLimited.length + slotsRunning.length ||
-            (endpoint.status.rateLimit == 0 && 0 < this.opts.maxSlots)
-          )
-            return endpoint;
-          else if (true) {
-          }
-
-          // else find the endpoint with the rate limit that will expire the soonest
+        if (slotsAvailable) {
+          this.queueIndex++;
         }
       }
-
-    return bestEndpoint;
+    }
   }
 }
 
 interface OverpassEndpointOptions {
+  gatewayTimeoutPause: number;
   maxSlots: number;
   verbose: boolean;
 }
 
 const defaultOverpassEndpointOptions = {
+  gatewayTimeoutPause: 2000,
   verbose: false,
   maxSlots: 4,
 };
 
 class OverpassEndpoint {
+  statusTimeout: NodeJS.Timeout | null = null;
   status: OverpassApiStatus | null = null;
   opts: OverpassEndpointOptions;
-  queue: Function[] = [];
+  queue: OverpassQuery[] = [];
   queueIndex: number = 0;
   uri: string;
-  statusTimeout: NodeJS.Timeout | null = null;
 
-  constructor(uri: string, opts: Partial<OverpassEndpointOptions>) {
+  constructor(uri: string, opts: Partial<OverpassEndpointOptions> = {}) {
     this.opts = Object.assign({}, defaultOverpassEndpointOptions, opts);
     this.uri = uri;
   }
@@ -143,33 +136,57 @@ class OverpassEndpoint {
   }
 
   async query(
-    query: string,
-    overpassOpts: Partial<OverpassOptions>
+    query: string | OverpassQuery,
+    overpassOpts: Partial<OverpassOptions> = {}
   ): Promise<Response> {
     if (!this.status) await this._initialize();
 
-    const queryIdx = this.queue.push(() =>
-      overpass(query, overpassOpts)
-        .then(async (resp) => {
-          await this._updateStatus();
-          this.queueIndex++;
-          return resp;
-        })
-        .catch(async (error) => {
-          await this._updateStatus();
-          this.queueIndex++;
-          throw error;
-        })
-    );
+    const queryObj = buildQueryObject(query, this.queue);
+    const queryIdx = this.queue.push(queryObj);
 
     return new Promise((res) => {
       const waitForQueue = () => {
-        if (queryIdx <= this.queueIndex) res(this.queue[queryIdx]());
-        setTimeout(waitForQueue, 100);
+        if (queryIdx <= this.queueIndex) res(this._sendQuery(queryObj));
+        else setTimeout(waitForQueue, 100);
       };
 
       waitForQueue();
     });
+  }
+
+  _sendQuery(query: OverpassQuery): Promise<Response> {
+    consoleMsg(`sending query ${query.name}`);
+
+    return overpass(query.query, query.options)
+      .then(async (resp) => {
+        await this._updateStatus();
+        this.queueIndex++;
+        return resp;
+      })
+      .catch(async (error) => {
+        await this._updateStatus();
+
+        if (error instanceof OverpassRateLimitError) {
+          // if query is rate limited, poll until we get slot available
+          return new Promise((res) => {
+            const waitForRateLimit = () => {
+              if (this.getSlotsAvailable()) res(this._sendQuery(query));
+              else setTimeout(waitForRateLimit, 100);
+            };
+
+            waitForRateLimit();
+          });
+        } else if (error instanceof OverpassGatewayTimeoutError) {
+          // if query is gateway timeout, pause some ms and send again
+          return sleep(this.opts.gatewayTimeoutPause).then(() =>
+            this._sendQuery(query)
+          );
+        } else {
+          // if is other error throw it to be handled upstream
+          this.queueIndex++;
+          throw error;
+        }
+      });
   }
 
   queryJson(
@@ -181,7 +198,7 @@ class OverpassEndpoint {
     ) as Promise<OverpassJson>;
   }
 
-  get rateLimit(): number | null {
+  getRateLimit(): number | null {
     return this.status
       ? this.status.rateLimit == 0
         ? this.opts.maxSlots
@@ -189,11 +206,14 @@ class OverpassEndpoint {
       : null;
   }
 
-  get slotsAvailable(): number | null {
-    return this.rateLimit && this.status
-      ? this.rateLimit -
+  getSlotsAvailable(): number | null {
+    // TODO account for slots already in queue but have been rate limited
+    const rateLimit = this.getRateLimit();
+
+    return rateLimit && this.status
+      ? rateLimit -
           this.status.slotsRunning.length -
           this.status.slotsLimited.length
-      : 0;
+      : null;
   }
 }

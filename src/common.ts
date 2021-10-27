@@ -1,3 +1,4 @@
+import { OverpassQuery } from "./manager";
 import { OverpassRuntimeError } from "./overpass";
 import { OverpassJson } from "./types";
 
@@ -70,4 +71,25 @@ export const checkRuntimeErrorXml = (text: string): string => {
 
     throw new OverpassRuntimeError(errors);
   } else return text as string;
+};
+
+export const buildQueryObject = (
+  query: string | OverpassQuery,
+  queue: OverpassQuery[]
+) => {
+  // build query object if we just get query string
+  if (typeof query === "string")
+    return {
+      name: queue.length.toString(),
+      query: query,
+      options: {},
+    };
+  // generate name based upon query idx if it's not given
+  else if (!("name" in query)) {
+    return Object.assign({}, query, {
+      name: queue.length.toString(),
+    });
+  }
+  // otherwise it's a complete query object
+  else return query;
 };
