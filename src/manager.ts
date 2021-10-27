@@ -7,11 +7,7 @@ import {
   overpassXml,
 } from "./overpass";
 import { main as mainEndpoint } from "./endpoints";
-import { queryOverpass, queryJson, queryXml } from "./query";
 import { OverpassJson } from "./types";
-import type { Readable } from "stream";
-import type { QueryOptions } from "./query";
-import type { OverpassOptions } from "./overpass";
 import { consoleMsg, OverpassError, sleep, buildQueryObject } from "./common";
 
 export interface OverpassManagerOptions {
@@ -47,7 +43,10 @@ export class OverpassManager {
     this.opts = Object.assign({}, defaultOverpassManagerOptions, opts);
     this.endpoints = [this.opts.endpoints]
       .flat()
-      .map((endpointUri) => new OverpassEndpoint(endpointUri));
+      .map(
+        (endpointUri) =>
+          new OverpassEndpoint(endpointUri, { verbose: this.opts.verbose })
+      );
   }
 
   async query(query: string | OverpassQuery) {
@@ -88,12 +87,13 @@ const defaultOverpassEndpointOptions = {
   maxSlots: 4,
 };
 
-class OverpassEndpoint {
+export class OverpassEndpoint {
   statusTimeout: NodeJS.Timeout | null = null;
-  status: OverpassApiStatus | null = null;
+  status: OverpassApiStatus | null | false = null;
   opts: OverpassEndpointOptions;
   queue: OverpassQuery[] = [];
   queueIndex: number = 0;
+  queueRunning: number = 0;
   uri: URL;
 
   constructor(uri: string, opts: Partial<OverpassEndpointOptions> = {}) {
@@ -102,22 +102,18 @@ class OverpassEndpoint {
   }
 
   _initialize() {
+    if (this.opts.verbose) consoleMsg(`${this.uri.host} initialize`);
+    this.status = false;
+
     return this._updateStatus().catch((error: any) => {
       throw new OverpassError(`API Status Error: ${this.uri}`);
     });
   }
 
   _updateStatus() {
-    if (this.opts.verbose) consoleMsg(`updating status ${this.uri.origin}`);
-
-    return apiStatus(this.uri.origin, { verbose: this.opts.verbose })
+    return apiStatus(this.uri.href, { verbose: this.opts.verbose })
       .then((apiStatus) => {
         this.status = apiStatus;
-
-        if (this.opts.verbose)
-          console.log(
-            `${this.uri.origin} status: ${apiStatus.slotsLimited} limited ${apiStatus.slotsRunning} running`
-          );
 
         // clear status timeout it already exists
         if (this.statusTimeout) {
@@ -125,9 +121,12 @@ class OverpassEndpoint {
           this.statusTimeout = null;
         }
 
-        // if there's any rate limited slots set timeout to update those
-        // slots status once the rate limit is over
-        if (this.status.slotsLimited.length > 0) {
+        // if there's any rate limited slots and something in the queue
+        // set timeout to update those slots status once the rate limit is over
+        if (
+          this.status.slotsLimited.length > 0 &&
+          this.queueIndex < this.queue.length
+        ) {
           const lowestRateLimitSeconds =
             Math.min(...this.status.slotsLimited.map((slot) => slot.seconds)) +
             1;
@@ -140,22 +139,35 @@ class OverpassEndpoint {
       .catch((error) => {
         // silently error apiStatus (some endpoints don't support /api/status)
         if (this.opts.verbose)
-          consoleMsg(`ERROR getting api status ${this.uri.origin}`);
+          consoleMsg(
+            `ERROR getting api status ${this.uri.origin} (${error.message})`
+          );
+
+        // set status to false if status endpoint broken
+        // make sure we don't ask again
+        this.status = false;
       });
   }
 
   async query(query: string | OverpassQuery): Promise<Response> {
-    if (!this.status) await this._initialize();
+    if (!this.status && this.status !== false) await this._initialize();
 
     const queryObj = buildQueryObject(query, this.queue);
     const queryIdx = this.queue.push(queryObj);
 
-    if (this.opts.verbose) consoleMsg(`queued query ${queryObj.name}`);
+    if (this.opts.verbose)
+      consoleMsg(`${this.uri.host} query ${queryObj.name} queued`);
 
     return new Promise((res) => {
       const waitForQueue = () => {
-        if (queryIdx <= this.queueIndex) res(this._sendQuery(queryObj));
-        else setTimeout(waitForQueue, 100);
+        if (
+          queryIdx <=
+          this.queueIndex + (this.getSlotsAvailable() as number)
+        ) {
+          this.queueIndex++;
+          this.queueRunning++;
+          res(this._sendQuery(queryObj));
+        } else setTimeout(waitForQueue, 100);
       };
 
       waitForQueue();
@@ -164,12 +176,16 @@ class OverpassEndpoint {
 
   _sendQuery(query: OverpassQuery): Promise<Response> {
     if (this.opts.verbose)
-      consoleMsg(`sending query ${query.name} ${this.uri.host}`);
+      consoleMsg(`${this.uri.host} query ${query.name} sending`);
 
     return overpass(query.query, query.options)
       .then(async (resp) => {
+        if (this.opts.verbose)
+          consoleMsg(`${this.uri.host} query ${query.name} complete`);
+
         await this._updateStatus();
-        this.queueIndex++;
+        this.queueRunning--;
+
         return resp;
       })
       .catch(async (error) => {
@@ -177,6 +193,9 @@ class OverpassEndpoint {
 
         if (error instanceof OverpassRateLimitError) {
           // if query is rate limited, poll until we get slot available
+          if (this.opts.verbose)
+            consoleMsg(`${this.uri.host} query ${query.name} rate limited`);
+
           return new Promise((res) => {
             const waitForRateLimit = () => {
               if (this.getSlotsAvailable()) res(this._sendQuery(query));
@@ -187,12 +206,22 @@ class OverpassEndpoint {
           });
         } else if (error instanceof OverpassGatewayTimeoutError) {
           // if query is gateway timeout, pause some ms and send again
+          if (this.opts.verbose)
+            consoleMsg(`${this.uri.host} query ${query.name} gateway timeout`);
+
           return sleep(this.opts.gatewayTimeoutPause).then(() =>
             this._sendQuery(query)
           );
         } else {
           // if is other error throw it to be handled upstream
-          this.queueIndex++;
+
+          if (this.opts.verbose)
+            consoleMsg(
+              `${this.uri.host} query ${query.name} uncaught error (${error.message})`
+            );
+
+          //this.queueIndex++;
+          this.queueRunning--;
           throw error;
         }
       });
@@ -216,9 +245,7 @@ class OverpassEndpoint {
     const rateLimit = this.getRateLimit();
 
     return rateLimit && this.status
-      ? rateLimit -
-          this.status.slotsRunning.length -
-          this.status.slotsLimited.length
+      ? rateLimit - this.queueRunning - this.status.slotsLimited.length
       : null;
   }
 }
