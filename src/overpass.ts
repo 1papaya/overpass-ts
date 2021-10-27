@@ -4,12 +4,10 @@ import type { Readable } from "stream";
 
 import { main as mainEndpoint } from "./endpoints";
 import {
-  checkRuntimeErrorJson,
-  checkRuntimeErrorXml,
   humanReadableBytes,
   OverpassError,
   consoleMsg,
-  matchAll
+  matchAll,
 } from "./common";
 
 import "isomorphic-fetch";
@@ -98,7 +96,13 @@ export const overpassJson = (
 ): Promise<OverpassJson> => {
   return overpass(query, opts)
     .then((resp) => resp.json())
-    .then((json: OverpassJson) => checkRuntimeErrorJson(json));
+    .then((json: OverpassJson) => {
+      // https://github.com/drolbr/Overpass-API/issues/94
+      // a "remark" in the output means an error occurred after
+      // the HTTP status code has already been sent
+      if (json.remark) throw new OverpassRuntimeError([json.remark]);
+      else return json as OverpassJson;
+    });
 };
 
 export const overpassXml = (
@@ -107,7 +111,28 @@ export const overpassXml = (
 ): Promise<string> => {
   return overpass(query, opts)
     .then((resp) => resp.text())
-    .then((text) => checkRuntimeErrorXml(text));
+    .then((text) => {
+      // https://github.com/drolbr/Overpass-API/issues/94
+      // a "remark" in the output means an error occurred after
+      // the HTTP status code has already been sent
+
+      // </remark> will always be at end of output, at same position
+      if (text.slice(-18, -9) === "</remark>") {
+        const textLines = text.split("\n");
+        const errors = [];
+
+        // loop backwards thru text lines skipping first 4 lines
+        // collect each remark (there can be multiple)
+        // break once remark is not matched
+        for (let i = textLines.length - 4; i > 0; i--) {
+          const remark = textLines[i].match(/<remark>\s*(.+)\s*<\/remark>/);
+          if (remark) errors.push(remark[1]);
+          else break;
+        }
+
+        throw new OverpassRuntimeError(errors);
+      } else return text as string;
+    });
 };
 
 export const overpassCsv = (
