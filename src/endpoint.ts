@@ -54,15 +54,15 @@ export class OverpassEndpoint {
   }
 
   _updateStatus() {
+    // clear status timeout it already exists
+    if (this.statusTimeout) {
+      clearTimeout(this.statusTimeout);
+      this.statusTimeout = null;
+    }
+
     return apiStatus(this.uri.href, { verbose: this.opts.verbose })
       .then((apiStatus) => {
         this.status = apiStatus;
-
-        // clear status timeout it already exists
-        if (this.statusTimeout) {
-          clearTimeout(this.statusTimeout);
-          this.statusTimeout = null;
-        }
 
         // if there's any rate limited slots and something in the queue
         // set timeout to update those slots status once the rate limit is over
@@ -72,7 +72,15 @@ export class OverpassEndpoint {
         ) {
           const lowestRateLimitSeconds =
             Math.min(...this.status.slotsLimited.map((slot) => slot.seconds)) +
-            1;
+            0.1;
+
+          if (
+            this.opts.verbose &&
+            this.status.slotsLimited.length == (this.getRateLimit() as number)
+          )
+            consoleMsg(
+              `${this.uri.host} rate limited; waiting ${lowestRateLimitSeconds}s`
+            );
 
           this.statusTimeout = setTimeout(async () => {
             await this._updateStatus();
@@ -83,7 +91,7 @@ export class OverpassEndpoint {
         // silently error apiStatus (some endpoints don't support /api/status)
         if (this.opts.verbose)
           consoleMsg(
-            `ERROR getting api status ${this.uri.origin} (${error.message})`
+            ` ${this.uri.host} ERROR getting api status (${error.message})`
           );
 
         // set status to false if status endpoint broken
@@ -195,11 +203,13 @@ export class OverpassEndpoint {
           if (this.opts.verbose)
             consoleMsg(`${this.uri.host} query ${query.name} rate limited`);
 
-          return new Promise((res) => {
+          return new Promise(async (res) => {
             const waitForRateLimit = () => {
               if (this.getSlotsAvailable()) res(this._sendQuery(query));
               else setTimeout(waitForRateLimit, 100);
             };
+
+            if (!this.statusTimeout) await this._updateStatus();
 
             waitForRateLimit();
           });
