@@ -49,7 +49,7 @@ export const apiStatus = (
 export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
   const status: any = {
     slotsRunning: [],
-    slotsAvailableAfter: [],
+    slotsLimited: [],
   };
 
   statusHtml.split("\n").forEach((statusLine) => {
@@ -60,7 +60,7 @@ export const parseApiStatus = (statusHtml: string): OverpassApiStatus => {
     else if (lineFirstWord == "Rate")
       status["rateLimit"] = parseInt(statusLine.slice(12));
     else if (lineFirstWord == "Slot")
-      status["slotsAvailableAfter"].push(
+      status["slotsLimited"].push(
         [statusLine.slice(22).split(", ")].map((splitLine) => ({
           time: splitLine[0],
           seconds: parseInt(splitLine[1].split(" ")[1]),
