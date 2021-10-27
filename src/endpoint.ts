@@ -97,18 +97,19 @@ export class OverpassEndpoint {
   ): Promise<
     Response | OverpassJson | string | Readable | ReadableStream | null
   > {
+    // initialize endpoint status if first query
+    if (!this.status && this.status !== false) await this._initialize();
+
     // add query to queue
     const queryIdx = this.queue.push(queryObj);
 
     // if no name specified in query, use the queue index as name
-    if (!("name" in queryObj)) {
-      queryObj.name = queryIdx.toString();
+    if (!queryObj.name) {
+      queryObj.name = (queryIdx - 1).toString();
     }
 
     if (this.opts.verbose)
       consoleMsg(`${this.uri.host} query ${queryObj.name} queued`);
-
-    if (!this.status && this.status !== false) await this._initialize();
 
     // poll queue until a slot is open and then execute query
     return new Promise((res) => {
@@ -129,7 +130,10 @@ export class OverpassEndpoint {
 
   query(query: string | Partial<OverpassQuery>): Promise<Response> {
     return this._query(
-      buildQueryObject(query, { name: this.queue.length.toString(), output: "raw" })
+      buildQueryObject(query, {
+        name: this.queue.length.toString(),
+        output: "raw",
+      })
     ) as Promise<Response>;
   }
 

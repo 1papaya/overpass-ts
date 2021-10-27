@@ -77,7 +77,7 @@ export const checkRuntimeErrorXml = (text: string): string => {
 };
 
 export interface OverpassQuery {
-  name?: string;
+  name: string | null;
   output: "raw" | "json" | "xml" | "csv" | "stream";
   query: string;
   options: OverpassOptions;
@@ -107,7 +107,7 @@ export const buildQueryObject = (
   // overwrite options
   queryObj = Object.assign(
     {},
-    { name: Math.round(Math.random() * 1000), output: "raw", options: {} },
+    { name: null, output: "raw", options: {} },
     queryObj,
     overwriteObj
   );

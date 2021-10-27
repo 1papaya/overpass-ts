@@ -6,15 +6,9 @@ describe("Overpass Manager", function () {
     const overpass = new OverpassEndpoint(mainEndpoint, { verbose: true });
 
     await Promise.all([
-      overpass
-        .query(`[out:json]; way(8675309); out geom;`)
-        .then((resp) => resp.json())
-        .then((json) => console.log(json)),
-      overpass.query(`[out:json]; way(8675309); out geom;`),
-      overpass.query(`[out:json]; way(8675309); out geom;`),
-      overpass.query(`[out:json]; way(8675309); out geom;`),
-      overpass.query(`[out:json]; way(8675309); out geom;`),
-      overpass.query(`[out:json]; way(8675309); out geom;`),
-    ]).then(() => console.log("DONE"));
+      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
+      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+      overpass.queryStream(`[out:json]; way(8675309); out geom;`),
+    ]).then((res) => console.log(res));
   });
 });
