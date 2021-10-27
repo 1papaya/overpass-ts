@@ -76,7 +76,7 @@ export const checkRuntimeErrorXml = (text: string): string => {
 export const buildQueryObject = (
   query: string | OverpassQuery,
   queue: OverpassQuery[]
-) => {
+): OverpassQuery => {
   // build query object if we just get query string
   if (typeof query === "string")
     return {
