@@ -1,7 +1,6 @@
 import {
   consoleMsg,
-  OverpassError,
-  ignoreExpiredCertificatesAgent,
+  OverpassError
 } from "./common";
 import "isomorphic-fetch";
 
@@ -21,9 +20,7 @@ export const apiStatus = (
   const endpointURL =
     typeof endpoint === "string" ? new URL(endpoint) : endpoint;
 
-  return fetch(endpointURL.href.replace("/interpreter", "/status"), {
-    agent: ignoreExpiredCertificatesAgent,
-  } as RequestInit)
+  return fetch(endpointURL.href.replace("/interpreter", "/status"))
     .then((resp) => {
       const responseType = resp.headers.get("content-type");
 

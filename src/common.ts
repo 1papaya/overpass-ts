@@ -1,10 +1,5 @@
 import { OverpassOptions, OverpassRuntimeError } from "./overpass";
 import { OverpassJson } from "./types";
-import * as https from "https";
-
-export const ignoreExpiredCertificatesAgent = new https.Agent({
-  rejectUnauthorized: false,
-});
 
 export const humanReadableBytes = (bytes: number) => {
   return bytes > 1024 * 1024
