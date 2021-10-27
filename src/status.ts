@@ -1,4 +1,9 @@
-import { consoleMsg, OverpassError } from "./common";
+import {
+  consoleMsg,
+  OverpassError,
+  ignoreExpiredCertificatesAgent,
+} from "./common";
+import "isomorphic-fetch";
 
 export interface ApiStatusOptions {
   verbose: boolean;
@@ -16,7 +21,9 @@ export const apiStatus = (
   const endpointURL =
     typeof endpoint === "string" ? new URL(endpoint) : endpoint;
 
-  return fetch(endpointURL.href.replace("/interpreter", "/status"))
+  return fetch(endpointURL.href.replace("/interpreter", "/status"), {
+    agent: ignoreExpiredCertificatesAgent,
+  } as RequestInit)
     .then((resp) => {
       const responseType = resp.headers.get("content-type");
 

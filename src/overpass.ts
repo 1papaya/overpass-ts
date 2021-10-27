@@ -10,6 +10,7 @@ import {
   OverpassError,
   consoleMsg,
   matchAll,
+  ignoreExpiredCertificatesAgent,
 } from "./common";
 
 import "isomorphic-fetch";
@@ -51,6 +52,7 @@ export const overpass = (
     method: "POST",
     mode: "cors",
     redirect: "follow",
+    agent: ignoreExpiredCertificatesAgent,
     headers: {
       Accept: "*",
       "User-Agent": opts.userAgent,
