@@ -1,5 +1,8 @@
-import { OverpassQuery } from "./manager";
-import { OverpassRuntimeError } from "./overpass";
+import {
+  defaultOverpassOptions,
+  OverpassOptions,
+  OverpassRuntimeError,
+} from "./overpass";
 import { OverpassJson } from "./types";
 
 export const humanReadableBytes = (bytes: number) => {
@@ -73,23 +76,41 @@ export const checkRuntimeErrorXml = (text: string): string => {
   } else return text as string;
 };
 
+export interface OverpassQuery {
+  name?: string;
+  output: "raw" | "json" | "xml" | "csv" | "stream";
+  query: string;
+  options: OverpassOptions;
+}
+
+export const defaultOverpassQuery = {};
+
 export const buildQueryObject = (
-  query: string | OverpassQuery,
-  queue: OverpassQuery[]
+  query: string | Partial<OverpassQuery>,
+  overwriteObj: {
+    name?: string;
+    output?: "raw" | "json" | "xml" | "csv" | "stream";
+    options?: Partial<OverpassOptions>;
+  } = {}
 ): OverpassQuery => {
+  let queryObj;
+
   // build query object if we just get query string
   if (typeof query === "string")
-    return {
-      name: queue.length.toString(),
+    queryObj = {
       query: query,
-      options: {},
     };
-  // generate name based upon query idx if it's not given
-  else if (!("name" in query)) {
-    return Object.assign({}, query, {
-      name: queue.length.toString(),
-    });
-  }
-  // otherwise it's a complete query object
-  else return query;
+  else if (!("query" in query))
+    throw new Error("Query Object must have {query}");
+  else queryObj = query;
+
+  // overwrite options
+  queryObj = Object.assign(
+    {},
+    { name: Math.round(Math.random() * 1000), output: "raw", options: {} },
+    queryObj,
+    overwriteObj
+  );
+
+  return queryObj as OverpassQuery;
 };

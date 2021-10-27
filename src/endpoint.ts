@@ -2,10 +2,21 @@ import { apiStatus, OverpassApiStatus } from "./status";
 import {
   overpass,
   OverpassGatewayTimeoutError,
+  overpassJson,
   OverpassRateLimitError,
+  overpassXml,
+  overpassCsv,
+  overpassStream,
 } from "./overpass";
-import { OverpassJson, OverpassQuery } from "./index";
-import { consoleMsg, OverpassError, sleep, buildQueryObject } from "./common";
+import { OverpassJson } from "./types";
+import {
+  OverpassQuery,
+  consoleMsg,
+  OverpassError,
+  sleep,
+  buildQueryObject,
+} from "./common";
+import type { Readable } from "stream";
 
 interface OverpassEndpointOptions {
   gatewayTimeoutPause: number;
@@ -81,15 +92,25 @@ export class OverpassEndpoint {
       });
   }
 
-  async query(query: string | OverpassQuery): Promise<Response> {
-    if (!this.status && this.status !== false) await this._initialize();
-
-    const queryObj = buildQueryObject(query, this.queue);
+  async _query(
+    queryObj: OverpassQuery
+  ): Promise<
+    Response | OverpassJson | string | Readable | ReadableStream | null
+  > {
+    // add query to queue
     const queryIdx = this.queue.push(queryObj);
+
+    // if no name specified in query, use the queue index as name
+    if (!("name" in queryObj)) {
+      queryObj.name = queryIdx.toString();
+    }
 
     if (this.opts.verbose)
       consoleMsg(`${this.uri.host} query ${queryObj.name} queued`);
 
+    if (!this.status && this.status !== false) await this._initialize();
+
+    // poll queue until a slot is open and then execute query
     return new Promise((res) => {
       const waitForQueue = () => {
         if (
@@ -106,12 +127,54 @@ export class OverpassEndpoint {
     });
   }
 
+  query(query: string | Partial<OverpassQuery>): Promise<Response> {
+    return this._query(
+      buildQueryObject(query, { name: this.queue.length.toString(), output: "raw" })
+    ) as Promise<Response>;
+  }
+
+  queryJson(query: string | Partial<OverpassQuery>): Promise<OverpassJson> {
+    return this._query(
+      buildQueryObject(query, { output: "json" })
+    ) as Promise<OverpassJson>;
+  }
+  queryXml(query: string | Partial<OverpassQuery>): Promise<string> {
+    return this._query(
+      buildQueryObject(query, { output: "xml" })
+    ) as Promise<string>;
+  }
+
+  queryCsv(query: string | Partial<OverpassQuery>): Promise<string> {
+    return this._query(
+      buildQueryObject(query, { output: "csv" })
+    ) as Promise<string>;
+  }
+
+  queryStream(
+    query: string | Partial<OverpassQuery>
+  ): Promise<Readable | ReadableStream | null> {
+    return this._query(
+      buildQueryObject(query, { output: "stream" })
+    ) as Promise<Readable | ReadableStream | null>;
+  }
+
   _sendQuery(query: OverpassQuery): Promise<Response> {
     if (this.opts.verbose)
       consoleMsg(`${this.uri.host} query ${query.name} sending`);
 
-    return overpass(query.query, query.options)
-      .then(async (resp) => {
+    // choose overpass function to use based upon desired output
+    // allows for checking of runtime errors early in promise chain
+
+    let overpassFn;
+
+    if (query.output == "json") overpassFn = overpassJson;
+    else if (query.output == "xml") overpassFn = overpassXml;
+    else if (query.output == "csv") overpassFn = overpassCsv;
+    else if (query.output == "stream") overpassFn = overpassStream;
+    else overpassFn = overpass;
+
+    return overpassFn(query.query, query.options)
+      .then(async (resp: any) => {
         if (this.opts.verbose)
           consoleMsg(`${this.uri.host} query ${query.name} complete`);
 
@@ -120,7 +183,7 @@ export class OverpassEndpoint {
 
         return resp;
       })
-      .catch(async (error) => {
+      .catch(async (error: any) => {
         await this._updateStatus();
 
         if (error instanceof OverpassRateLimitError) {
@@ -157,12 +220,6 @@ export class OverpassEndpoint {
           throw error;
         }
       });
-  }
-
-  queryJson(query: string | OverpassQuery): Promise<OverpassJson> {
-    return this.query(query).then((resp) =>
-      resp.json()
-    ) as Promise<OverpassJson>;
   }
 
   getRateLimit(): number | null {

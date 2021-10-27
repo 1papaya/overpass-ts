@@ -1,6 +1,6 @@
 import { main as mainEndpoint } from "./endpoints";
 import { OverpassEndpoint } from "./endpoint";
-import { buildQueryObject } from "./common";
+import { OverpassQuery, buildQueryObject } from "./common";
 
 export interface OverpassManagerOptions {
   endpoints: string | string[];
@@ -17,12 +17,6 @@ const defaultOverpassManagerOptions = {
   retryPause: 2000,
   verbose: false,
 };
-
-export interface OverpassQuery {
-  name?: string;
-  query: string;
-  options: { [key: string]: string };
-}
 
 export class OverpassManager {
   opts: OverpassManagerOptions = defaultOverpassManagerOptions;
@@ -42,7 +36,7 @@ export class OverpassManager {
   }
 
   async query(query: string | OverpassQuery) {
-    const queryObj = buildQueryObject(query, this.queue);
+    const queryObj = buildQueryObject(query);
 
     this.queue.push(queryObj);
 
