@@ -9,12 +9,14 @@ export const defaultApiStatusOptions: ApiStatusOptions = {
 };
 
 export const apiStatus = (
-  endpoint: string,
+  endpoint: string | URL,
   apiStatusOpt: Partial<ApiStatusOptions> = {}
 ): Promise<OverpassApiStatus> => {
   const opts = Object.assign({}, defaultApiStatusOptions, apiStatusOpt);
+  const endpointURL =
+    typeof endpoint === "string" ? new URL(endpoint) : endpoint;
 
-  return fetch(endpoint.replace("/interpreter", "/status"))
+  return fetch(endpointURL.href.replace("/interpreter", "/status"))
     .then((resp) => {
       const responseType = resp.headers.get("content-type");
 
@@ -34,7 +36,7 @@ export const apiStatus = (
       if (opts.verbose)
         consoleMsg(
           [
-            "apiStatus",
+            endpointURL.host,
             ["rate limit", apiStatus.rateLimit],
             ["slots limited", apiStatus.slotsLimited.length],
             ["slots running", apiStatus.slotsRunning.length],
