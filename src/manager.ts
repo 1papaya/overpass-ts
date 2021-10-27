@@ -108,11 +108,16 @@ class OverpassEndpoint {
   }
 
   _updateStatus() {
-    if (this.opts.verbose) consoleMsg(`updating status ${this.uri}`);
+    if (this.opts.verbose) consoleMsg(`updating status ${this.uri.origin}`);
 
-    return apiStatus(this.uri.origin, { verbose: this.opts.verbose }).then(
-      (apiStatus) => {
+    return apiStatus(this.uri.origin, { verbose: this.opts.verbose })
+      .then((apiStatus) => {
         this.status = apiStatus;
+
+        if (this.opts.verbose)
+          console.log(
+            `${this.uri.origin} status: ${apiStatus.slotsLimited} limited ${apiStatus.slotsRunning} running`
+          );
 
         // clear status timeout it already exists
         if (this.statusTimeout) {
@@ -131,18 +136,21 @@ class OverpassEndpoint {
             await this._updateStatus();
           }, lowestRateLimitSeconds * 1000);
         }
-      }
-    );
+      })
+      .catch((error) => {
+        // silently error apiStatus (some endpoints don't support /api/status)
+        if (this.opts.verbose)
+          consoleMsg(`ERROR getting api status ${this.uri.origin}`);
+      });
   }
 
-  async query(
-    query: string | OverpassQuery,
-    overpassOpts: Partial<OverpassOptions> = {}
-  ): Promise<Response> {
+  async query(query: string | OverpassQuery): Promise<Response> {
     if (!this.status) await this._initialize();
 
     const queryObj = buildQueryObject(query, this.queue);
     const queryIdx = this.queue.push(queryObj);
+
+    if (this.opts.verbose) consoleMsg(`queued query ${queryObj.name}`);
 
     return new Promise((res) => {
       const waitForQueue = () => {
@@ -155,7 +163,8 @@ class OverpassEndpoint {
   }
 
   _sendQuery(query: OverpassQuery): Promise<Response> {
-    consoleMsg(`sending query ${query.name} ${this.uri.host}`);
+    if (this.opts.verbose)
+      consoleMsg(`sending query ${query.name} ${this.uri.host}`);
 
     return overpass(query.query, query.options)
       .then(async (resp) => {
@@ -189,11 +198,8 @@ class OverpassEndpoint {
       });
   }
 
-  queryJson(
-    query: string,
-    overpassOpts: Partial<OverpassOptions>
-  ): Promise<OverpassJson> {
-    return this.query(query, overpassOpts).then((resp) =>
+  queryJson(query: string | OverpassQuery): Promise<OverpassJson> {
+    return this.query(query).then((resp) =>
       resp.json()
     ) as Promise<OverpassJson>;
   }
@@ -207,7 +213,6 @@ class OverpassEndpoint {
   }
 
   getSlotsAvailable(): number | null {
-    // TODO account for slots already in queue but have been rate limited
     const rateLimit = this.getRateLimit();
 
     return rateLimit && this.status
