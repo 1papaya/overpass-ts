@@ -94,11 +94,11 @@ class OverpassEndpoint {
   opts: OverpassEndpointOptions;
   queue: OverpassQuery[] = [];
   queueIndex: number = 0;
-  uri: string;
+  uri: URL;
 
   constructor(uri: string, opts: Partial<OverpassEndpointOptions> = {}) {
     this.opts = Object.assign({}, defaultOverpassEndpointOptions, opts);
-    this.uri = uri;
+    this.uri = new URL(uri);
   }
 
   _initialize() {
@@ -110,7 +110,7 @@ class OverpassEndpoint {
   _updateStatus() {
     if (this.opts.verbose) consoleMsg(`updating status ${this.uri}`);
 
-    return apiStatus(this.uri, { verbose: this.opts.verbose }).then(
+    return apiStatus(this.uri.origin, { verbose: this.opts.verbose }).then(
       (apiStatus) => {
         this.status = apiStatus;
 
@@ -155,7 +155,7 @@ class OverpassEndpoint {
   }
 
   _sendQuery(query: OverpassQuery): Promise<Response> {
-    consoleMsg(`sending query ${query.name}`);
+    consoleMsg(`sending query ${query.name} ${this.uri.host}`);
 
     return overpass(query.query, query.options)
       .then(async (resp) => {
