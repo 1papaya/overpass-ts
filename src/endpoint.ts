@@ -178,8 +178,15 @@ export class OverpassEndpoint {
         if (this.opts.verbose)
           consoleMsg(`${this.uri.host} query ${query.name} complete`);
 
-        if (this.statusAvailable) await this.updateStatus();
         this.queueRunning--;
+
+        if (this.statusAvailable) {
+          // if query isn't last one in queue, update status
+          if (this.queueIndex < this.queue.length) await this.updateStatus();
+          // if query is last, set status = null
+          // so a fresh status will be requested if new queries performed
+          else this.status = null;
+        }
 
         return resp;
       })
