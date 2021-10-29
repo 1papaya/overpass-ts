@@ -1,7 +1,4 @@
-import {
-  consoleMsg,
-  OverpassError
-} from "./common";
+import { consoleMsg, OverpassError } from "./common";
 import "isomorphic-fetch";
 
 export interface ApiStatusOptions {
@@ -41,12 +38,13 @@ export const apiStatus = (
         consoleMsg(
           [
             endpointURL.host,
-            ["rate limit", apiStatus.rateLimit],
-            ["slots limited", apiStatus.slotsLimited.length],
-            ["slots running", apiStatus.slotsRunning.length],
-          ]
-            .flat()
-            .join(" ")
+            "status",
+            [
+              `(rl ${apiStatus.rateLimit}`,
+              `sl ${apiStatus.slotsLimited.length}`,
+              `sr ${apiStatus.slotsRunning.length})`,
+            ].join(" "),
+          ].join(" ")
         );
 
       return apiStatus;
