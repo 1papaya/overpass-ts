@@ -110,8 +110,13 @@ export class OverpassEndpoint {
     if (this.opts.verbose)
       consoleMsg(`${this.uri.host} query ${queryObj.name} queued`);
 
-    // initialize endpoint status if first query
-    if (this.queue.length == 1) await this.updateStatus();
+    // initialize endpoint status if endpoint is idle (no queries in queue)
+    if (
+      !this.status &&
+      this.statusAvailable &&
+      this.queue.length - 1 == this.queueIndex
+    )
+      await this.updateStatus();
 
     // poll queue until a slot is open and then execute query
     return new Promise((res) => {
@@ -200,14 +205,14 @@ export class OverpassEndpoint {
 
           return new Promise(async (res) => {
             const waitForRateLimit = () => {
+              console.log("slots", this.getSlotsAvailable());
               if (this.getSlotsAvailable()) res(this._sendQuery(query));
               else setTimeout(waitForRateLimit, 100);
             };
 
-            if (!this.statusTimeout && this.statusAvailable)
+            if (!this.statusTimeout && this.statusAvailable) {
               await this.updateStatus();
-            else
-              await sleep(this.opts.rateLimitPause);
+            } else await sleep(this.opts.rateLimitPause);
 
             waitForRateLimit();
           });

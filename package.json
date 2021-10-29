@@ -16,7 +16,8 @@
     "build": "npm run clean && npm run build:src && npm run build:types",
     "download-examples": "node test/download-examples.js",
     "test:debug": "DEBUG=overpass mocha --timeout 360000 test/test-*.ts",
-    "test": "mocha --timeout 360000 test/test-*.ts"
+    "test": "mocha --timeout 360000 test/test-*.ts",
+    "test:endpoint": "DEBUG=overpass mocha --timeout 360000 test/test-endpoint.ts"
   },
   "author": "1papaya",
   "license": "MIT",
