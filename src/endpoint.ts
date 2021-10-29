@@ -20,12 +20,14 @@ import type { Readable } from "stream";
 
 interface OverpassEndpointOptions {
   gatewayTimeoutPause: number;
+  rateLimitPause: number;
   maxSlots: number;
   verbose: boolean;
 }
 
 const defaultOverpassEndpointOptions = {
   gatewayTimeoutPause: 2000,
+  rateLimitPause: 2000,
   verbose: false,
   maxSlots: 4,
 };
@@ -191,8 +193,6 @@ export class OverpassEndpoint {
         return resp;
       })
       .catch(async (error: any) => {
-        await this.updateStatus();
-
         if (error instanceof OverpassRateLimitError) {
           // if query is rate limited, poll until we get slot available
           if (this.opts.verbose)
@@ -204,7 +204,10 @@ export class OverpassEndpoint {
               else setTimeout(waitForRateLimit, 100);
             };
 
-            if (!this.statusTimeout) await this.updateStatus();
+            if (!this.statusTimeout && this.statusAvailable)
+              await this.updateStatus();
+            else
+              await sleep(this.opts.rateLimitPause);
 
             waitForRateLimit();
           });
@@ -225,6 +228,10 @@ export class OverpassEndpoint {
             );
 
           this.queueRunning--;
+
+          if (!this.statusTimeout && this.statusAvailable)
+            await this.updateStatus();
+
           throw error;
         }
       });
