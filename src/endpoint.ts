@@ -88,7 +88,6 @@ export class OverpassEndpoint {
 
         // set status to false if status endpoint broken
         // make sure we don't ask again
-        // TODO use statusAvailable ?
         this.statusAvailable = false;
       });
   }
@@ -225,22 +224,29 @@ export class OverpassEndpoint {
   }
 
   getRateLimit(): number {
-    return this.status
-      ? this.status.rateLimit == 0
-        ? this.opts.maxSlots
-        : this.status.rateLimit
-      : this.statusAvailable
-      ? 0
-      : this.opts.maxSlots;
+    if (this.status) {
+      // if status is loaded and has limited rate limit return that
+      if (this.status.rateLimit > 0) return this.status.rateLimit;
+      // if unlimited rate limit, return default maxSlots
+      else return this.opts.maxSlots;
+    } else {
+      // if status is unavailable return default maxSlots
+      if (!this.statusAvailable) return this.opts.maxSlots;
+      // if status isn't loaded but still available (initial load) return 0
+      else return 0;
+    }
   }
 
   getSlotsAvailable(): number {
     const rateLimit = this.getRateLimit();
 
-    return rateLimit && this.status
-      ? rateLimit - this.queueRunning - this.status.slotsLimited.length
-      : this.statusAvailable
-      ? rateLimit - this.queueRunning
-      : 0;
+    if (this.status) {
+      return rateLimit - this.queueRunning - this.status.slotsLimited.length;
+    } else {
+      // if status isn't loaded but still available (initial load) return 0
+      if (this.statusAvailable) return 0;
+      // if endpoint has broken /api/status just don't include limited slots
+      else return rateLimit - this.queueRunning;
+    }
   }
 }
