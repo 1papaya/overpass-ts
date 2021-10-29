@@ -33,6 +33,7 @@ const defaultOverpassEndpointOptions = {
 export class OverpassEndpoint {
   statusTimeout: NodeJS.Timeout | null = null;
   status: OverpassApiStatus | null | false = null;
+  statusAvailable: boolean = true;
   opts: OverpassEndpointOptions;
   queue: OverpassQuery[] = [];
   queueIndex: number = 0;
@@ -44,16 +45,7 @@ export class OverpassEndpoint {
     this.uri = new URL(uri);
   }
 
-  _initialize() {
-    if (this.opts.verbose) consoleMsg(`${this.uri.host} initialize`);
-    this.status = false;
-
-    return this._updateStatus().catch((error: any) => {
-      throw new OverpassError(`API Status Error: ${this.uri}`);
-    });
-  }
-
-  _updateStatus() {
+  updateStatus() {
     // clear status timeout it already exists
     if (this.statusTimeout) {
       clearTimeout(this.statusTimeout);
@@ -83,7 +75,7 @@ export class OverpassEndpoint {
             );
 
           this.statusTimeout = setTimeout(async () => {
-            await this._updateStatus();
+            await this.updateStatus();
           }, lowestRateLimitSeconds * 1000);
         }
       })
@@ -96,7 +88,8 @@ export class OverpassEndpoint {
 
         // set status to false if status endpoint broken
         // make sure we don't ask again
-        this.status = false;
+        // TODO use statusAvailable ?
+        this.statusAvailable = false;
       });
   }
 
@@ -105,9 +98,6 @@ export class OverpassEndpoint {
   ): Promise<
     Response | OverpassJson | string | Readable | ReadableStream | null
   > {
-    // initialize endpoint status if first query
-    if (!this.status && this.status !== false) await this._initialize();
-
     // add query to queue
     const queryIdx = this.queue.push(queryObj);
 
@@ -119,13 +109,13 @@ export class OverpassEndpoint {
     if (this.opts.verbose)
       consoleMsg(`${this.uri.host} query ${queryObj.name} queued`);
 
+    // initialize endpoint status if first query
+    if (this.queue.length == 1) await this.updateStatus();
+
     // poll queue until a slot is open and then execute query
     return new Promise((res) => {
       const waitForQueue = () => {
-        if (
-          queryIdx <=
-          this.queueIndex + (this.getSlotsAvailable() as number)
-        ) {
+        if (queryIdx <= this.queueIndex + this.getSlotsAvailable()) {
           this.queueIndex++;
           this.queueRunning++;
           res(this._sendQuery(queryObj));
@@ -139,7 +129,6 @@ export class OverpassEndpoint {
   query(query: string | Partial<OverpassQuery>): Promise<Response> {
     return this._query(
       buildQueryObject(query, {
-        name: this.queue.length.toString(),
         output: "raw",
       })
     ) as Promise<Response>;
@@ -190,13 +179,13 @@ export class OverpassEndpoint {
         if (this.opts.verbose)
           consoleMsg(`${this.uri.host} query ${query.name} complete`);
 
-        await this._updateStatus();
+        if (this.statusAvailable) await this.updateStatus();
         this.queueRunning--;
 
         return resp;
       })
       .catch(async (error: any) => {
-        await this._updateStatus();
+        await this.updateStatus();
 
         if (error instanceof OverpassRateLimitError) {
           // if query is rate limited, poll until we get slot available
@@ -209,7 +198,7 @@ export class OverpassEndpoint {
               else setTimeout(waitForRateLimit, 100);
             };
 
-            if (!this.statusTimeout) await this._updateStatus();
+            if (!this.statusTimeout) await this.updateStatus();
 
             waitForRateLimit();
           });
@@ -229,26 +218,29 @@ export class OverpassEndpoint {
               `${this.uri.host} query ${query.name} uncaught error (${error.message})`
             );
 
-          //this.queueIndex++;
           this.queueRunning--;
           throw error;
         }
       });
   }
 
-  getRateLimit(): number | null {
+  getRateLimit(): number {
     return this.status
       ? this.status.rateLimit == 0
         ? this.opts.maxSlots
         : this.status.rateLimit
-      : null;
+      : this.statusAvailable
+      ? 0
+      : this.opts.maxSlots;
   }
 
-  getSlotsAvailable(): number | null {
+  getSlotsAvailable(): number {
     const rateLimit = this.getRateLimit();
 
     return rateLimit && this.status
       ? rateLimit - this.queueRunning - this.status.slotsLimited.length
-      : null;
+      : this.statusAvailable
+      ? rateLimit - this.queueRunning
+      : 0;
   }
 }
