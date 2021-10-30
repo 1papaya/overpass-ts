@@ -5,7 +5,7 @@ import {
   france as franceEndpoint,
   usmil as usmilEndpoint,
 } from "../src/endpoints";
-import { debug } from "./common";
+import { debug, bigQuery, smallQuery } from "./common";
 
 describe("Overpass Endpoint", function () {
   it("works on consecutive queries", async function () {
