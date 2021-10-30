@@ -36,7 +36,7 @@ export class OverpassManager {
       );
   }
 
-  async query(query: string | OverpassQuery) {
+  async query(query: string | Partial<OverpassQuery>) {
     if (!this.endpointsInitialized) {
       this.endpointsInitialized = true;
       await Promise.all(
@@ -64,23 +64,4 @@ export class OverpassManager {
 
     return null;
   }
-
-  // _pollEndpoints() {
-  //   // TODO make sure this good
-
-  //   // check if there are any slots available for
-  //   if (this.queue.length < this.queueIndex)
-  //     clearInterval(this.poll as NodeJS.Timeout);
-  //   else {
-  //     const numPendingQueries = this.queue.length - this.queueIndex;
-
-  //     for (let endpoint of this.endpoints) {
-  //       const slotsAvailable = endpoint.getSlotsAvailable();
-
-  //       if (slotsAvailable) {
-  //         this.queueIndex++;
-  //       }
-  //     }
-  //   }
-  // }
 }

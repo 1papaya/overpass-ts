@@ -79,7 +79,7 @@ export class OverpassEndpoint {
         // silently error apiStatus (some endpoints don't support /api/status)
         if (this.opts.verbose)
           consoleMsg(
-            ` ${this.uri.host} ERROR getting api status (${error.message})`
+            `${this.uri.host} ERROR getting api status (${error.message})`
           );
 
         // set status to false if status endpoint broken
@@ -202,7 +202,7 @@ export class OverpassEndpoint {
             const waitForRateLimit = () => {
               // +1 to account for slotsAvailable not accounting for this
               // particular rate limited request
-              if (this.getSlotsAvailable() > 0) res(this._sendQuery(query));
+              if (this.getSlotsAvailable() + 1 > 0) res(this._sendQuery(query));
               else setTimeout(waitForRateLimit, 100);
             };
 
