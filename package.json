@@ -1,6 +1,6 @@
 {
   "name": "overpass-ts",
-  "version": "4.2.4",
+  "version": "4.3.0",
   "description": "typescript overpass api",
   "main": "dist/overpass-ts.js",
   "module": "dist/overpass-ts.module.js",
@@ -17,7 +17,8 @@
     "download-examples": "node test/download-examples.js",
     "test:debug": "DEBUG=overpass mocha --timeout 360000 test/test-*.ts",
     "test": "mocha --timeout 360000 test/test-*.ts",
-    "test:endpoint": "DEBUG=overpass mocha --timeout 360000 test/test-endpoint.ts"
+    "test:endpoint": "DEBUG=overpass mocha --timeout 360000 test/test-endpoint.ts",
+    "test:manager": "DEBUG=overpass mocha --timeout 360000 test/test-manager.ts"
   },
   "author": "1papaya",
   "license": "MIT",
