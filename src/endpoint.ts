@@ -56,7 +56,7 @@ export class OverpassEndpoint {
         // set timeout to update status once the rate limit is over
         if (
           this.status.slotsLimited.length == this.getRateLimit() &&
-          this.queueIndex < this.queue.length
+          (this.queueIndex < this.queue.length || this.queue.length == 0)
         ) {
           const lowestRateLimitSeconds =
             Math.min(...this.status.slotsLimited.map((slot) => slot.seconds)) +
@@ -183,10 +183,11 @@ export class OverpassEndpoint {
 
         if (this.statusAvailable) {
           // if query isn't last one in queue, update status
-          if (this.queueIndex < this.queue.length) this.updateStatus();
+          //if (this.queueIndex < this.queue.length)
+          await this.updateStatus();
           // if query is last, set status = null
           // so a fresh status will be requested if new queries performed
-          else this.status = null;
+          //else this.status = null;
         }
 
         return resp;

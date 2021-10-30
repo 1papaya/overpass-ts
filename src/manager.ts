@@ -24,6 +24,7 @@ export class OverpassManager {
   queueIndex: number = 0;
   poll: NodeJS.Timeout | null = null;
   endpoints: OverpassEndpoint[] = [];
+  endpointsInitialized: boolean = false;
 
   constructor(opts: Partial<OverpassManagerOptions> = {}) {
     this.opts = Object.assign({}, defaultOverpassManagerOptions, opts);
@@ -36,27 +37,50 @@ export class OverpassManager {
   }
 
   async query(query: string | OverpassQuery) {
-    const queryObj = buildQueryObject(query);
-
-    this.queue.push(queryObj);
-
-    if (!this.poll) this.poll = setInterval(() => this._pollEndpoints(), 500);
-  }
-
-  _pollEndpoints() {
-    // TODO make sure this good
-
-    // check if there are any slots available for
-    if (this.queue.length < this.queueIndex)
-      clearInterval(this.poll as NodeJS.Timeout);
-    else {
-      for (let endpoint of this.endpoints) {
-        const slotsAvailable = endpoint.getSlotsAvailable();
-
-        if (slotsAvailable) {
-          this.queueIndex++;
-        }
-      }
+    if (!this.endpointsInitialized) {
+      this.endpointsInitialized = true;
+      await Promise.all(
+        this.endpoints.map((endpoint) => endpoint.updateStatus())
+      );
     }
+
+    return new Promise((res) => {
+      const waitForAvailableEndpoint = () => {
+        const endpoint = this._getAvailableEndpoint();
+        if (endpoint) res(endpoint.query(query));
+        else setTimeout(waitForAvailableEndpoint, 100);
+      };
+
+      waitForAvailableEndpoint();
+    });
   }
+
+  _getAvailableEndpoint(): OverpassEndpoint | null {
+    for (let endpoint of this.endpoints) {
+      const slotsAvailable = endpoint.getSlotsAvailable();
+
+      if (slotsAvailable > 0) return endpoint;
+    }
+
+    return null;
+  }
+
+  // _pollEndpoints() {
+  //   // TODO make sure this good
+
+  //   // check if there are any slots available for
+  //   if (this.queue.length < this.queueIndex)
+  //     clearInterval(this.poll as NodeJS.Timeout);
+  //   else {
+  //     const numPendingQueries = this.queue.length - this.queueIndex;
+
+  //     for (let endpoint of this.endpoints) {
+  //       const slotsAvailable = endpoint.getSlotsAvailable();
+
+  //       if (slotsAvailable) {
+  //         this.queueIndex++;
+  //       }
+  //     }
+  //   }
+  // }
 }
