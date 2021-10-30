@@ -21,7 +21,7 @@ interface OverpassEndpointOptions {
 
 const defaultOverpassEndpointOptions = {
   gatewayTimeoutPause: 2000,
-  rateLimitPause: 2000,
+  rateLimitPause: 5000,
   verbose: false,
   maxSlots: 4,
 };
@@ -55,8 +55,8 @@ export class OverpassEndpoint {
         // if there's any rate limited slots and something in the queue
         // set timeout to update status once the rate limit is over
         if (
-          this.status.slotsLimited.length == this.getRateLimit() &&
-          (this.queueIndex < this.queue.length || this.queue.length == 0)
+          this.status.slotsLimited.length == this.getRateLimit() //&&
+          // (this.queueIndex < this.queue.length || this.queue.length == 0)
         ) {
           const lowestRateLimitSeconds =
             Math.min(...this.status.slotsLimited.map((slot) => slot.seconds)) +
@@ -206,7 +206,7 @@ export class OverpassEndpoint {
               else setTimeout(waitForRateLimit, 100);
             };
 
-            if (!this.statusTimeout && this.statusAvailable) {
+            if (this.statusAvailable) {
               await this.updateStatus();
             } else await sleep(this.opts.rateLimitPause);
 
@@ -258,11 +258,7 @@ export class OverpassEndpoint {
     if (this.status) {
       // include slotsLimited in available calculation if there's nothing
       // running in the queue (happens on startup)
-      return (
-        rateLimit -
-        this.queueRunning -
-        (this.queueRunning ? 0 : this.status.slotsLimited.length)
-      );
+      return rateLimit - this.queueRunning - this.status.slotsLimited.length;
     } else {
       // if status isn't loaded but still available (initial load) return 0
       if (this.statusAvailable) return 0;
