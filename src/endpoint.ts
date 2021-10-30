@@ -9,13 +9,7 @@ import {
   overpassStream,
 } from "./overpass";
 import { OverpassJson } from "./types";
-import {
-  OverpassQuery,
-  consoleMsg,
-  OverpassError,
-  sleep,
-  buildQueryObject,
-} from "./common";
+import { OverpassQuery, consoleMsg, sleep, buildQueryObject } from "./common";
 import type { Readable } from "stream";
 
 interface OverpassEndpointOptions {
@@ -59,9 +53,9 @@ export class OverpassEndpoint {
         this.status = apiStatus;
 
         // if there's any rate limited slots and something in the queue
-        // set timeout to update those slots status once the rate limit is over
+        // set timeout to update status once the rate limit is over
         if (
-          this.status.slotsLimited.length > 0 &&
+          this.status.slotsLimited.length == this.getRateLimit() &&
           this.queueIndex < this.queue.length
         ) {
           const lowestRateLimitSeconds =
@@ -70,7 +64,7 @@ export class OverpassEndpoint {
 
           if (
             this.opts.verbose &&
-            this.status.slotsLimited.length == (this.getRateLimit() as number)
+            this.status.slotsLimited.length == this.getRateLimit()
           )
             consoleMsg(
               `${this.uri.host} rate limited; waiting ${lowestRateLimitSeconds}s`
@@ -189,7 +183,7 @@ export class OverpassEndpoint {
 
         if (this.statusAvailable) {
           // if query isn't last one in queue, update status
-          if (this.queueIndex < this.queue.length) await this.updateStatus();
+          if (this.queueIndex < this.queue.length) this.updateStatus();
           // if query is last, set status = null
           // so a fresh status will be requested if new queries performed
           else this.status = null;
@@ -205,8 +199,9 @@ export class OverpassEndpoint {
 
           return new Promise(async (res) => {
             const waitForRateLimit = () => {
-              console.log("slots", this.getSlotsAvailable());
-              if (this.getSlotsAvailable()) res(this._sendQuery(query));
+              // +1 to account for slotsAvailable not accounting for this
+              // particular rate limited request
+              if (this.getSlotsAvailable() > 0) res(this._sendQuery(query));
               else setTimeout(waitForRateLimit, 100);
             };
 
@@ -225,7 +220,7 @@ export class OverpassEndpoint {
             this._sendQuery(query)
           );
         } else {
-          // if is other error throw it to be handled upstream
+          // if is other error throw it to be handled downstream
 
           if (this.opts.verbose)
             consoleMsg(
@@ -260,7 +255,13 @@ export class OverpassEndpoint {
     const rateLimit = this.getRateLimit();
 
     if (this.status) {
-      return rateLimit - this.queueRunning - this.status.slotsLimited.length;
+      // include slotsLimited in available calculation if there's nothing
+      // running in the queue (happens on startup)
+      return (
+        rateLimit -
+        this.queueRunning -
+        (this.queueRunning ? 0 : this.status.slotsLimited.length)
+      );
     } else {
       // if status isn't loaded but still available (initial load) return 0
       if (this.statusAvailable) return 0;
