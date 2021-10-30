@@ -14,20 +14,21 @@ describe("Overpass Endpoint", function () {
     });
 
     await Promise.all([
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
     ]).then((res) =>
       Promise.all([
-        overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-        overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-        overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-        overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-        overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-        overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+        bigQuery(overpass),
+        bigQuery(overpass),
+        bigQuery(overpass),
+        bigQuery(overpass),
+        bigQuery(overpass),
+        bigQuery(overpass),
+        bigQuery(overpass),
       ])
     );
   });
@@ -38,12 +39,12 @@ describe("Overpass Endpoint", function () {
     });
 
     await Promise.all([
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
     ]).then((res) => console.log("DONE"));
   });
 
@@ -53,12 +54,12 @@ describe("Overpass Endpoint", function () {
     });
 
     await Promise.all([
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
     ]).then((res) => console.log("DONE"));
   });
 
@@ -68,24 +69,12 @@ describe("Overpass Endpoint", function () {
     });
 
     await Promise.all([
-      overpass.queryJson(
-        `[out:json][bbox:42.50450,0.06591,42.8437,0.582];way[highway=path];out geom;`
-      ),
-      overpass.queryJson(
-        `[out:json][bbox:42.50450,0.06591,42.8437,0.582];way[highway=path];out geom;`
-      ),
-      overpass.queryJson(
-        `[out:json][bbox:42.50450,0.06591,42.8437,0.582];way[highway=path];out geom;`
-      ),
-      overpass.queryJson(
-        `[out:json][bbox:42.50450,0.06591,42.8437,0.582];way[highway=path];out geom;`
-      ),
-      overpass.queryJson(
-        `[out:json][bbox:42.50450,0.06591,42.8437,0.582];way[highway=path];out geom;`
-      ),
-      overpass.queryJson(
-        `[out:json][bbox:42.50450,0.06591,42.8437,0.582];way[highway=path];out geom;`
-      ),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
     ]).then((res) => console.log("DONE"));
   });
 
@@ -95,12 +84,12 @@ describe("Overpass Endpoint", function () {
     });
 
     await Promise.all([
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
     ]).then((res) => console.log("DONE"));
   });
 
@@ -110,12 +99,12 @@ describe("Overpass Endpoint", function () {
     });
 
     await Promise.all([
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
-      overpass.queryJson(`[out:json]; way(8675309); out geom;`),
-      overpass.queryXml(`[out:xml]; way(8675309); out geom;`),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
+      bigQuery(overpass),
     ]).then((res) => console.log("DONE"));
   });
 });
