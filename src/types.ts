@@ -14,6 +14,7 @@ export interface OverpassJson {
     | OverpassNode
     | OverpassWay
     | OverpassRelation
+    | OverpassArea
     | OverpassTimeline
     | OverpassCount
   >;
