@@ -22,7 +22,7 @@ export const sleep = (ms: number) => {
 };
 
 export const consoleMsg = (msg: string) => {
-  console.log(`${new Date(Date.now()).toUTCString()} Overpass: ${msg}`);
+  console.log(`${new Date(Date.now()).toISOString()} Overpass: ${msg}`);
 };
 
 // export const oneLessRetry = (opts: OverpassOptions) =>
