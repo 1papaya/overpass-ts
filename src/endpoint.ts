@@ -15,6 +15,7 @@ import type { Readable } from "stream";
 interface OverpassEndpointOptions {
   gatewayTimeoutPause: number;
   rateLimitPause: number;
+  minRequestInterval: number;
   maxSlots: number;
   verbose: boolean;
 }
@@ -22,6 +23,7 @@ interface OverpassEndpointOptions {
 const defaultOverpassEndpointOptions = {
   gatewayTimeoutPause: 2000,
   rateLimitPause: 5000,
+  minRequestInterval: 2000,
   verbose: false,
   maxSlots: 4,
 };
@@ -115,10 +117,13 @@ export class OverpassEndpoint {
     // poll queue until a slot is open and then execute query
     return new Promise((res) => {
       const waitForQueue = () => {
-        if (queryIdx <= this.queueIndex + this.getSlotsAvailable()) {
+        const slotsAvailable = this.getSlotsAvailable();
+        if (queryIdx <= this.queueIndex + slotsAvailable) {
           this.queueIndex++;
           this.queueRunning++;
-          res(this._sendQuery(queryObj));
+          setTimeout(() => {
+            res(this._sendQuery(queryObj));
+          }, (this.queueIndex + slotsAvailable - queryIdx) * this.opts.minRequestInterval);
         } else setTimeout(waitForQueue, 100);
       };
 
