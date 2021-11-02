@@ -5,7 +5,7 @@
   "main": "dist/overpass-ts.js",
   "module": "dist/overpass-ts.module.js",
   "browser": "dist/overpass-ts.browser.js",
-  "types": "dist/overpass-ts.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -16,15 +16,12 @@
     "build": "npm run clean && npm run build:src && npm run build:types",
     "download-examples": "node test/download-examples.js",
     "test:debug": "DEBUG=overpass mocha --timeout 360000 test/test-*.ts",
-    "test": "mocha --timeout 360000 test/test-*.ts",
-    "test:endpoint": "DEBUG=overpass mocha --timeout 360000 test/test-endpoint.ts",
-    "test:manager": "DEBUG=overpass mocha --timeout 360000 test/test-manager.ts"
+    "test": "mocha --timeout 360000 test/test-*.ts"
   },
   "author": "1papaya",
   "license": "MIT",
   "dependencies": {
-    "isomorphic-fetch": "^3.0.0",
-    "p-queue": "^6.4.0"
+    "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^18.0.0",
