@@ -50,7 +50,7 @@ export class OverpassManager {
     return new Promise((res) => {
       const waitForAvailableEndpoint = () => {
         const endpoint = this._getAvailableEndpoint();
-        if (endpoint) res(endpoint.query(query));
+        if (endpoint) res(endpoint._query(query));
         else setTimeout(waitForAvailableEndpoint, 100);
       };
 
