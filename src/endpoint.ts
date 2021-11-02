@@ -123,7 +123,7 @@ export class OverpassEndpoint {
           this.queueRunning++;
           setTimeout(() => {
             res(this._sendQuery(queryObj));
-          }, (this.queueIndex + slotsAvailable - queryIdx) * this.opts.minRequestInterval);
+          }, (this.queueIndex + slotsAvailable - queryIdx - 1) * this.opts.minRequestInterval);
         } else setTimeout(waitForQueue, 100);
       };
 
