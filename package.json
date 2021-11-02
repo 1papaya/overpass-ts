@@ -1,6 +1,6 @@
 {
   "name": "overpass-ts",
-  "version": "4.3.2",
+  "version": "4.3.3",
   "description": "typescript overpass api",
   "main": "dist/overpass-ts.js",
   "module": "dist/overpass-ts.module.js",
