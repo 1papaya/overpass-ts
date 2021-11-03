@@ -51,6 +51,8 @@ export const overpass = (
     redirect: "follow",
     headers: {
       Accept: "*",
+      "Cache-control": "no-cache",
+      "Pragma": "no-cache",
       "User-Agent": opts.userAgent,
     },
   } as RequestInit;

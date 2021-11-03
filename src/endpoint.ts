@@ -179,7 +179,10 @@ export class OverpassEndpoint {
     else if (query.output == "stream") overpassFn = overpassStream;
     else overpassFn = overpass;
 
-    return overpassFn(query.query, query.options)
+    return overpassFn(query.query, {
+      ...query.options,
+      endpoint: this.uri.href,
+    })
       .then(async (resp: any) => {
         if (this.opts.verbose)
           consoleMsg(`${this.uri.host} query ${query.name} complete`);
