@@ -15,8 +15,8 @@ promise-based overpass api client in typescript
 * `query`: *string* Overpass API query
 * `opt`: *object* Query options
   * `endpoint` *string* Overpass API endpoint URL
-  * `rateLimitRetries` *number* Number of retries when rate limited/gateway timeout-ed before giving up
-  * `rateLimitPause` *number* Pause in between receiving a rate limited response and initiating a retry
+  * `numRetries` *number* Number of retries when rate limited/gateway timeout-ed before giving up
+  * `retryPause` *number* Pause in between receiving a rate limited response and initiating a retry
   * `verbose` *boolean* Output verbose query information
   * `stream` *boolean* Return a stream.Readable (in Node) or ReadableStream (in browser)
   * `fetchOpts` *object* Options to be passed to fetch
