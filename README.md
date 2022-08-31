@@ -29,10 +29,11 @@ Returns:
 ## example
 ```ts
 import type { OverpassJson } from "overpass-ts";
-import { overpass } from "overpass-ts";
+import { overpassJson } from "overpass-ts";
+import { strict as assert } from 'assert';
 
 // json request
-overpass(`[out:json]; node(626639517); out ids;`).then((json) => {
+overpassJson(`[out:json]; node(626639517); out ids;`).then((json) => {
   json = json as OverpassJson; // cast correct response type based on query
   assert.deepStrictEqual(json.elements[0], {
     type: "node",
